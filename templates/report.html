@@ -362,11 +362,12 @@
 <body>
     <div class="report-header">
         <div class="container">
-            <h1><i class="bi bi-bar-chart-line"></i> Hisse Geri Alımı ve Temettü Etki Analizi</h1>
-            <p>Detaylı Analiz Raporu | {{ generation_date|default('Oluşturulma Tarihi: ' + creation_date, true) }}</p>
+            <h1>Detaylı Analiz Raporu</h1>
+            <p>Hisse Geri Alımı ve Temettü Etki Analizi</p>
+            <p class="text-light">Oluşturulma Tarihi: {{ creation_date }}</p>
         </div>
     </div>
-    
+
     <div class="container">
         <div class="report-nav">
             <div class="d-flex flex-nowrap overflow-auto">
@@ -465,13 +466,16 @@
     
     <div class="action-buttons">
         <button type="button" class="btn btn-primary" onclick="window.print()" title="Raporu Yazdır">
-            <i class="bi bi-printer"></i>
+            <i class="bi bi-printer"></i> Yazdır
+        </button>
+        <button type="button" class="btn btn-success" onclick="downloadReport()" title="Raporu İndir">
+            <i class="bi bi-download"></i> İndir
         </button>
         <a href="/" class="btn btn-secondary" title="Ana Sayfaya Dön">
-            <i class="bi bi-house"></i>
+            <i class="bi bi-house"></i> Ana Sayfa
         </a>
         <a href="/results" class="btn btn-info" title="Sonuçlar Sayfasına Git">
-            <i class="bi bi-bar-chart"></i>
+            <i class="bi bi-bar-chart"></i> Sonuçlar
         </a>
     </div>
     
@@ -793,6 +797,28 @@
                         }
                     }
                 });
+            }
+        }
+        
+        // Rapor indirme fonksiyonu
+        async function downloadReport() {
+            try {
+                const response = await fetch('/api/report-content');
+                const data = await response.text();
+                
+                // Markdown dosyasını indirme
+                const blob = new Blob([data], { type: 'text/markdown' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `analiz_raporu_${new Date().toISOString().split('T')[0]}.md`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('Rapor indirme hatası:', error);
+                alert('Rapor indirilirken bir hata oluştu. Lütfen tekrar deneyin.');
             }
         }
     </script>

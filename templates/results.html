@@ -565,8 +565,12 @@
                     <p>&copy; 2023 Hisse Geri Alım ve Temettü Etki Analizi</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <a href="/report" class="me-3"><i class="bi bi-file-earmark-text"></i> Detaylı Rapor</a>
-                    <a href="/api/results" class="me-3"><i class="bi bi-file-earmark-code"></i> JSON Verileri</a>
+                    <a href="/report" class="btn btn-outline-info me-3" target="_blank">
+                        <i class="bi bi-file-earmark-text"></i> Detaylı Rapor
+                    </a>
+                    <a href="/api/results" class="btn btn-outline-secondary me-3" target="_blank" id="downloadJsonBtn">
+                        <i class="bi bi-file-earmark-code"></i> JSON Verileri
+                    </a>
                 </div>
             </div>
         </div>
@@ -1108,6 +1112,29 @@
                 console.error("Grafik güncelleme hatası:", error);
             }
         }
+
+        // JSON indirme fonksiyonu
+        document.getElementById('downloadJsonBtn').addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/api/results');
+                const data = await response.json();
+                
+                // JSON dosyasını indirme
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `analiz_sonuclari_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('JSON verisi indirme hatası:', error);
+                alert('Veriler indirilirken bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+        });
     </script>
 </body>
 </html> 

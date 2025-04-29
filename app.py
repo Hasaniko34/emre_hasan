@@ -1484,396 +1484,123 @@ def show_results():
 
 @app.route('/report')
 def show_report():
-    """Raporu görüntüler"""
+    """Detaylı analiz raporu sayfası"""
     try:
-        report_dir = os.path.join(PROJECT_ROOT, 'report')
-        os.makedirs(report_dir, exist_ok=True)
-        
-        report_path = os.path.join(report_dir, 'final_report.md')
-        report_content = ""
-        
-        # Rapor verilerini hazırla
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        creation_date = now  # Eksik değişkeni tanımla
-        generation_date = now  # İsteğe bağlı olarak ekstra bir oluşturma tarihi değişkeni
-        
-        # Veri dosyalarının yolları
+        # Sonuç dosyalarının yolları
         results_dir = os.path.join(PROJECT_ROOT, 'results')
-        os.makedirs(results_dir, exist_ok=True)
+        event_study_file = os.path.join(results_dir, 'event_study_all_summary.csv')
+        financial_file = os.path.join(results_dir, 'financial_analysis_summary.csv')
         
-        event_study_path = os.path.join(results_dir, 'event_study_all_summary.csv')
-        financial_path = os.path.join(results_dir, 'financial_analysis_summary.csv')
-        comparison_path = os.path.join(results_dir, 'buyback_vs_dividend_comparison.csv')
-        config_path = os.path.join(PROJECT_ROOT, 'data', 'analysis_config.json')
+        # Sonuç dosyalarını kontrol et
+        if not os.path.exists(event_study_file) or not os.path.exists(financial_file):
+            flash('Henüz analiz sonuçları bulunmuyor. Lütfen önce analiz çalıştırın.', 'warning')
+            return redirect(url_for('dashboard'))
         
-        # Veri dosyalarını yükle
-        event_study_df = pd.DataFrame()
-        financial_df = pd.DataFrame()
-        comparison_df = pd.DataFrame()
-        company_info = []
+        # Sonuçları oku
+        event_study_df = pd.read_csv(event_study_file)
+        financial_df = pd.read_csv(financial_file)
         
-        if os.path.exists(event_study_path):
-            try:
-                event_study_df = pd.read_csv(event_study_path)
-            except Exception as e:
-                print(f"Olay çalışması verisi yüklenirken hata: {str(e)}")
+        # Sütun isimlerini düzenle
+        event_study_df = event_study_df.rename(columns={
+            'ticker': 'Symbol',
+            'event_type': 'Event_Type',
+            'avg_car': 'CAR',
+            'avg_car_percent': 'CAR_Percent',
+            'std_car': 'Std_CAR'
+        })
         
-        if os.path.exists(financial_path):
-            try:
-                financial_df = pd.read_csv(financial_path)
-            except Exception as e:
-                print(f"Finansal analiz verisi yüklenirken hata: {str(e)}")
+        financial_df = financial_df.rename(columns={
+            'ticker': 'Symbol',
+            'roe_latest': 'ROE',
+            'roa_latest': 'ROA',
+            'profit_margin': 'Profit_Margin',
+            'dividend_yield': 'Dividend_Yield'
+        })
         
-        # Şirket bilgilerini yükle
-        data_dir = os.path.join(PROJECT_ROOT, 'data')
-        company_info_path = os.path.join(data_dir, 'company_info.json')
+        # Rapor oluşturma tarihi
+        creation_date = datetime.now().strftime('%d.%m.%Y %H:%M')
         
-        if os.path.exists(company_info_path):
-            try:
-                with open(company_info_path, 'r', encoding='utf-8') as f:
-                    company_info = json.load(f)
-            except Exception as e:
-                print(f"Şirket bilgileri yüklenirken hata: {str(e)}")
+        # Analiz edilen şirketler
+        analyzed_companies = event_study_df['Symbol'].unique().tolist()
         
-        # Analiz konfigürasyon verilerini yükle
-        analysis_period = "Belirtilmemiş"
-        company_count = 0
-        last_update = now
-        start_date = "2021-01-01"
-        end_date = "2023-12-31"
-        companies = []
+        # Olay çalışması sonuçları
+        event_study_summary = {
+            'total_events': len(event_study_df),
+            'positive_car': len(event_study_df[event_study_df['CAR'] > 0]),
+            'negative_car': len(event_study_df[event_study_df['CAR'] < 0]),
+            'avg_car': event_study_df['CAR'].mean() * 100,  # Yüzde olarak göster
+            'max_car': event_study_df['CAR'].max() * 100,
+            'min_car': event_study_df['CAR'].min() * 100,
+            'significant_events': len(event_study_df[event_study_df['CAR'].abs() > event_study_df['Std_CAR']])
+        }
         
-        if os.path.exists(config_path):
-            try:
-                with open(config_path, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-                    if 'start_date' in config and 'end_date' in config:
-                        start_date = config['start_date']
-                        end_date = config['end_date']
-                        analysis_period = f"{start_date} - {end_date}"
-                    if 'companies' in config:
-                        companies = config['companies']
-                        company_count = len(companies)
-                    if 'analysis_date' in config:
-                        last_update = config['analysis_date']
-            except Exception as e:
-                print(f"Konfigürasyon verisi yüklenirken hata: {str(e)}")
+        # Finansal analiz sonuçları
+        financial_summary = {
+            'avg_roe': financial_df['ROE'].mean(),
+            'avg_roa': financial_df['ROA'].mean(),
+            'avg_profit_margin': financial_df['Profit_Margin'].mean(),
+            'avg_dividend_yield': financial_df['Dividend_Yield'].mean() * 100,  # Yüzde olarak göster
+            'total_companies': len(financial_df)
+        }
         
-        # Karşılaştırma verilerini yükle
-        buyback_avg_car = 0
-        dividend_avg_car = 0
-        car_difference = 0
-        buyback_car_change = 0.35
-        dividend_car_change = -0.18
+        # Dinamik yorumlar oluştur
+        insights = []
         
-        if os.path.exists(comparison_path):
-            try:
-                comparison_df = pd.read_csv(comparison_path)
-                for _, row in comparison_df.iterrows():
-                    if row['event_type'].lower() == 'buyback':
-                        buyback_avg_car = float(row['avg_car'])
-                    elif row['event_type'].lower() == 'dividend':
-                        dividend_avg_car = float(row['avg_car'])
-                
-                car_difference = abs(buyback_avg_car - dividend_avg_car)
-                
-                # Değişim yüzdeleri için basit hesaplama (örnek)
-                buyback_car_change = round(buyback_avg_car * 0.12, 2)  # Önceki döneme göre %12 artış varsayımı
-                dividend_car_change = round(dividend_avg_car * -0.07, 2)  # Önceki döneme göre %7 azalış varsayımı
-            except Exception as e:
-                print(f"Karşılaştırma verisi yüklenirken hata: {str(e)}")
-        
-        # Markdown dosyasını yükle
-        if os.path.exists(report_path):
-            try:
-                import markdown2
-                
-                with open(report_path, 'r', encoding='utf-8') as f:
-                    report_content = f.read()
-                
-                # Markdown içeriğini HTML'e dönüştür
-                report_content = markdown2.markdown(
-                    report_content,
-                    extras=["tables", "fenced-code-blocks", "header-ids", "toc"]
-                )
-            except ImportError:
-                # markdown2 yoksa düz metin olarak göster
-                with open(report_path, 'r', encoding='utf-8') as f:
-                    report_content = f.read()
-                    report_content = f"<pre>{report_content}</pre>"
+        # Olay çalışması yorumları
+        if event_study_summary['avg_car'] > 0:
+            car_insight = f"Ortalama Kümülatif Anormal Getiri (CAR) %{event_study_summary['avg_car']:.2f} ile pozitif yönde gerçekleşmiştir."
         else:
-            # Rapor dosyası yoksa, temel bilgilerle yeni bir rapor oluştur
-            report_content = f"""
-            <div class="report-section" id="ozet">
-                <h2>Özet</h2>
-                <p>Bu çalışma, şirketlerin nakit dağıtımı stratejileri olan hisse geri alımları ve temettü ödemelerinin hisse fiyatı performansı, hisse başına karlılık (EPS) ve diğer finansal göstergeler üzerindeki etkisini karşılaştırmalı olarak analiz etmektedir.</p>
-                
-                <div class="key-finding-card">
-                    <h4>Anahtar Bulgu</h4>
-                    <p>Hisse geri alım duyuruları, temettü duyurularına kıyasla daha güçlü bir pozitif piyasa tepkisi yaratmaktadır. Ortalama CAR değerleri: Geri alım %{buyback_avg_car:.2f}, Temettü %{dividend_avg_car:.2f}.</p>
-                </div>
-            </div>
-            
-            <div class="report-section" id="giris">
-                <h2>Giriş</h2>
-                <p>Şirketler, nakit fazlalarını değerlendirmek ve hissedar değeri yaratmak için temettü ödemesi veya hisse geri alımı stratejilerinden birini ya da her ikisini birden tercih etmektedirler. Son yıllarda, özellikle ABD piyasalarında, hisse geri alımlarının temettü ödemelerine kıyasla daha yaygın hale geldiği gözlemlenmektedir. Bu tercih değişikliğinin ardındaki nedenler ve bu değişimin hissedar değeri üzerindeki etkileri, finans literatüründe önemli bir tartışma konusudur.</p>
-                <p>Bu çalışma, hem teorik tartışmalara katkı sağlamayı hem de yatırımcılar ve finansal analistler için pratik içgörüler sunmayı amaçlamaktadır.</p>
-                
-                <h2>Veri ve Metodoloji</h2>
-                
-                <h3>Şirket Seçimi ve Örneklem</h3>
-                
-                <p>Bu çalışmada, aşağıdaki şirketler incelenmiştir:</p>
-            """
-            
-            # Şirket bilgilerini ekle
-            us_companies = []
-            tr_companies = []
-            
-            for info in company_info:
-                ticker = info.get('ticker', '')
-                name = info.get('name', ticker)
-                sector = info.get('sector', 'Bilinmiyor')
-                country = info.get('country', 'Bilinmiyor')
-                
-                if '.IS' in ticker:  # Türkiye şirketleri
-                    tr_companies.append(f"<li>{name} ({ticker.replace('.IS', '')}) - {sector}</li>")
-                else:  # ABD şirketleri
-                    us_companies.append(f"<li>{name} ({ticker}) - {sector}</li>")
-            
-            if us_companies:
-                report_content += "<p><strong>ABD Şirketleri:</strong></p><ul>"
-                report_content += "".join(us_companies) + "</ul>"
-            
-            if tr_companies:
-                report_content += "<p><strong>Türkiye Şirketleri:</strong></p><ul>"
-                report_content += "".join(tr_companies) + "</ul>"
-            
-            report_content += f"""
-            <h3>Veri Kaynakları</h3>
-            
-            <p>Çalışmada kullanılan veriler aşağıdaki kaynaklardan elde edilmiştir:</p>
-            
-            <ul>
-                <li><strong>Hisse Fiyat Verileri</strong>: Yahoo Finance API</li>
-                <li><strong>Hisse Geri Alım Duyuruları</strong>: Simülasyon (gerçek uygulama için şirket duyuruları kullanılabilir)</li>
-                <li><strong>Temettü Duyuruları</strong>: Yahoo Finance</li>
-                <li><strong>Finansal Tablo Verileri</strong>: Yahoo Finance API (çeyreklik finansal raporlar)</li>
-            </ul>
-            
-            <h3>Olay Çalışması (Event Study) Metodolojisi</h3>
-            
-            <p>Çalışmada, hisse geri alım ve temettü duyurularının hisse fiyatı üzerindeki etkisini ölçmek için olay çalışması (event study) metodolojisi kullanılmıştır.</p>
-            
-            <ol>
-                <li><strong>Olay Penceresi</strong>: Duyuru tarihinden 5 gün öncesi ve 5 gün sonrası ([-5, +5])</li>
-                <li><strong>Tahmin Penceresi</strong>: Olay penceresinden önceki 120 iş günü</li>
-                <li><strong>Normal Getiri Modeli</strong>: Piyasa modeli (Ri = αi + βi × Rm + εi)</li>
-                <li><strong>Anormal Getiri</strong>: ARit = Rit - E(Rit)</li>
-                <li><strong>Kümülatif Anormal Getiri (CAR)</strong>: ∑ARit</li>
-            </ol>
-            
-            <h2>Bulgular</h2>
-            
-            <h3>Olay Çalışması Sonuçları</h3>
-            
-            <h4>Anormal Getiriler</h4>
-            
-            <p>Hisse geri alım duyuruları ve temettü duyuruları sonrasında gözlemlenen ortalama anormal getiriler aşağıdaki tabloda özetlenmiştir:</p>
-            
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Olay Türü</th>
-                        <th>Ortalama CAR (-5,+5) (%)</th>
-                        <th>Ortalama CAR (-2,+2) (%)</th>
-                        <th>Ortalama CAR (0,+1) (%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-            """
-            
-            # Karşılaştırma verilerini ekle
-            if not comparison_df.empty:
-                for _, row in comparison_df.iterrows():
-                    event_type = row.get('event_type', '')
-                    avg_car = row.get('avg_car', 0)
-                    avg_roe = row.get('avg_roe', 0)
-                    avg_roa = row.get('avg_roa', 0)
-                    
-                    report_content += f"<tr><td>{event_type}</td><td>{avg_car:.2f}</td><td>{avg_roe:.2f}</td><td>{avg_roa:.2f}</td></tr>"
-            else:
-                # Örnek veriler
-                report_content += f"<tr><td>Buyback</td><td>{buyback_avg_car:.2f}</td><td>2.35</td><td>1.87</td></tr>"
-                report_content += f"<tr><td>Dividend</td><td>{dividend_avg_car:.2f}</td><td>1.65</td><td>1.12</td></tr>"
-            
-            report_content += """</tbody></table>"""
-            
-            # Karşılaştırma yorumu
-            if buyback_avg_car > dividend_avg_car:
-                report_content += f"<p>Hisse geri alım duyurularının, temettü duyurularına kıyasla daha güçlü bir pozitif piyasa tepkisi yarattığı gözlemlenmiştir ({buyback_avg_car:.2f}% vs {dividend_avg_car:.2f}%). Bu bulgu, literatürdeki birçok çalışmayla uyumludur.</p>"
-            else:
-                report_content += f"<p>Temettü duyurularının, hisse geri alım duyurularına kıyasla daha güçlü bir pozitif piyasa tepkisi yarattığı gözlemlenmiştir ({dividend_avg_car:.2f}% vs {buyback_avg_car:.2f}%). Bu bulgu, literatürdeki bazı çalışmalarla farklılık göstermektedir.</p>"
-            
-            report_content += """
-            <h3>Finansal Analiz Sonuçları</h3>
-            
-            <h4>Şirketlerin Finansal Göstergeleri</h4>
-            
-            <p>Analize dahil edilen şirketlerin temel finansal göstergeleri:</p>
-            
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Şirket</th>
-                        <th>Sektör</th>
-                        <th>ROE (%)</th>
-                        <th>ROA (%)</th>
-                        <th>Borç/Özkaynak</th>
-                        <th>Temettü Verimi (%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-            """
-            
-            # Finansal verileri ekle
-            if not financial_df.empty:
-                for _, row in financial_df.iterrows():
-                    ticker = row.get('ticker', '')
-                    company_name = row.get('company_name', ticker) if 'company_name' in row else ticker
-                    sector = row.get('sector', 'Bilinmiyor') if 'sector' in row else "Bilinmiyor"
-                    roe = row.get('roe_latest', 0) if 'roe_latest' in row else 0
-                    roa = row.get('roa_latest', 0) if 'roa_latest' in row else 0
-                    debt_equity = row.get('debt_equity_ratio', 0) if 'debt_equity_ratio' in row else 0
-                    dividend_yield = row.get('dividend_yield', 0) if 'dividend_yield' in row else 0
-                    
-                    report_content += f"<tr><td>{company_name}</td><td>{sector}</td><td>{roe:.2f}</td><td>{roa:.2f}</td><td>{debt_equity:.2f}</td><td>{dividend_yield*100:.2f}</td></tr>"
-            else:
-                # Örnek veriler
-                report_content += "<tr><td>Apple Inc.</td><td>Teknoloji</td><td>154.45</td><td>28.32</td><td>1.56</td><td>0.52</td></tr>"
-                report_content += "<tr><td>Microsoft Corp.</td><td>Teknoloji</td><td>42.12</td><td>19.67</td><td>0.74</td><td>0.87</td></tr>"
-                report_content += "<tr><td>Johnson & Johnson</td><td>Sağlık</td><td>28.47</td><td>11.21</td><td>0.51</td><td>2.45</td></tr>"
-            
-            report_content += """</tbody></table>
-            
-            <h4>Hisse Geri Alımı ve Temettü Etkisi Karşılaştırması</h4>
-            
-            <p>Hisse geri alımı ve temettü duyurularının finansal göstergeler üzerindeki etkisi:</p>
-            
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Finansal Gösterge</th>
-                        <th>Hisse Geri Alımı Etkisi</th>
-                        <th>Temettü Etkisi</th>
-                    </tr>
-                </thead>
-                <tbody>
-            """
-            
-            # Finansal etki verilerini ekle (basitleştirilmiş veya örnek veriler)
-            buyback_roe_change = 2.45
-            dividend_roe_change = 1.82
-            buyback_roa_change = 1.23
-            dividend_roa_change = 0.95
-            buyback_ni_change = 3.67
-            dividend_ni_change = 2.18
-            
-            if not financial_df.empty and not event_study_df.empty:
-                buyback_tickers = event_study_df[event_study_df['event_type'] == 'Buyback']['ticker'].tolist()
-                dividend_tickers = event_study_df[event_study_df['event_type'] == 'Dividend']['ticker'].tolist()
-                
-                if buyback_tickers and 'roe_change' in financial_df.columns:
-                    buyback_roe_change = financial_df[financial_df['ticker'].isin(buyback_tickers)]['roe_change'].mean()
-                
-                if dividend_tickers and 'roe_change' in financial_df.columns:
-                    dividend_roe_change = financial_df[financial_df['ticker'].isin(dividend_tickers)]['roe_change'].mean()
-                
-                if buyback_tickers and 'roa_change' in financial_df.columns:
-                    buyback_roa_change = financial_df[financial_df['ticker'].isin(buyback_tickers)]['roa_change'].mean()
-                
-                if dividend_tickers and 'roa_change' in financial_df.columns:
-                    dividend_roa_change = financial_df[financial_df['ticker'].isin(dividend_tickers)]['roa_change'].mean()
-                
-                if buyback_tickers and 'net_income_change' in financial_df.columns:
-                    buyback_ni_change = financial_df[financial_df['ticker'].isin(buyback_tickers)]['net_income_change'].mean()
-                
-                if dividend_tickers and 'net_income_change' in financial_df.columns:
-                    dividend_ni_change = financial_df[financial_df['ticker'].isin(dividend_tickers)]['net_income_change'].mean()
-            
-            report_content += f"<tr><td>ROE Değişimi (%)</td><td>{buyback_roe_change:.2f}</td><td>{dividend_roe_change:.2f}</td></tr>"
-            report_content += f"<tr><td>ROA Değişimi (%)</td><td>{buyback_roa_change:.2f}</td><td>{dividend_roa_change:.2f}</td></tr>"
-            report_content += f"<tr><td>Net Gelir Değişimi (%)</td><td>{buyback_ni_change:.2f}</td><td>{dividend_ni_change:.2f}</td></tr>"
-            
-            report_content += """</tbody></table>
-            
-            <h2>Sonuç</h2>
-            
-            <h3>Genel Değerlendirme</h3>
-            
-            <p>Bu çalışma, hisse geri alımları ve temettü ödemelerinin hisse değeri üzerindeki etkilerini karşılaştırmalı olarak analiz etmiştir.</p>
-            
-            <p>Bulgularımız:</p>
-            
-            <ol>"""
-            
-            if buyback_avg_car > dividend_avg_car:
-                report_content += f"<li>Olay çalışması sonuçlarına göre, hisse geri alım duyuruları daha güçlü bir pozitif piyasa tepkisi yaratmıştır.</li>"
-            else:
-                report_content += f"<li>Olay çalışması sonuçlarına göre, temettü duyuruları daha güçlü bir pozitif piyasa tepkisi yaratmıştır.</li>"
-            
-            if buyback_roe_change > dividend_roe_change:
-                report_content += f"<li>Finansal göstergeler üzerindeki etki incelendiğinde, hisse geri alımlarının ROE üzerinde daha olumlu bir etki yarattığı gözlemlenmiştir.</li>"
-            else:
-                report_content += f"<li>Finansal göstergeler üzerindeki etki incelendiğinde, temettü ödemelerinin ROE üzerinde daha olumlu bir etki yarattığı gözlemlenmiştir.</li>"
-            
-            if buyback_ni_change > dividend_ni_change:
-                report_content += f"<li>Net gelir değişimi açısından hisse geri alımları daha olumlu sonuçlar göstermiştir.</li>"
-            else:
-                report_content += f"<li>Net gelir değişimi açısından temettü ödemeleri daha olumlu sonuçlar göstermiştir.</li>"
-            
-            report_content += """</ol>
-            
-            <p>Bu sonuçlar, şirketlerin nakit dağıtım stratejilerini belirlerken hissedar değerini maksimize etmek için çeşitli faktörleri göz önünde bulundurmaları gerektiğini göstermektedir.</p>
-            
-            <h3>Yatırımcılar İçin Öneriler</h3>
-            
-            <p>Bu çalışmanın sonuçları doğrultusunda yatırımcılar için şu önerilerde bulunulabilir:</p>
-            
-            <ol>
-                <li>Hisse geri alım duyurularının genellikle daha güçlü bir pozitif piyasa tepkisi yarattığı dikkate alınarak, bu tür duyuruları takip etmek kısa vadeli yatırım stratejileri için faydalı olabilir.</li>
-                <li>Uzun vadeli yatırımcılar için, hem hisse geri alımları hem de temettü ödemeleri şirketin finansal sağlığının göstergeleri olarak değerlendirilebilir.</li>
-                <li>Sektör dinamikleri ve şirketin büyüme aşaması, nakit dağıtım stratejisinin hisse değeri üzerindeki etkisini değiştirebildiği için, bu faktörler de dikkate alınmalıdır.</li>
-            </ol>
-            
-            <p class="text-muted mt-4">Analizimiz {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} tarihinde gerçekleştirilmiştir.</p>
-            """
+            car_insight = f"Ortalama Kümülatif Anormal Getiri (CAR) %{event_study_summary['avg_car']:.2f} ile negatif yönde gerçekleşmiştir."
         
-        # Rapor HTML'ini döndür
-        return render_template('report.html', 
-                              report_content=report_content,
-                              analysis_period=analysis_period,
-                              company_count=company_count,
-                              last_update=last_update,
-                              buyback_avg_car=buyback_avg_car,
-                              dividend_avg_car=dividend_avg_car,
-                              car_difference=car_difference,
-                              buyback_car_change=buyback_car_change,
-                              dividend_car_change=dividend_car_change)
-                              
+        significance_ratio = event_study_summary['significant_events'] / event_study_summary['total_events'] * 100
+        significance_insight = f"İncelenen olayların %{significance_ratio:.1f}'i istatistiksel olarak anlamlıdır."
+        
+        positive_ratio = event_study_summary['positive_car'] / event_study_summary['total_events'] * 100
+        direction_insight = f"Olayların %{positive_ratio:.1f}'i pozitif getiri sağlamıştır."
+        
+        insights.extend([car_insight, significance_insight, direction_insight])
+        
+        # Finansal analiz yorumları
+        if financial_summary['avg_roe'] > 15:
+            roe_insight = f"Ortalama Özkaynak Karlılığı (ROE) %{financial_summary['avg_roe']:.1f} ile güçlü bir performans göstermektedir."
+        else:
+            roe_insight = f"Ortalama Özkaynak Karlılığı (ROE) %{financial_summary['avg_roe']:.1f} seviyesindedir."
+        
+        if financial_summary['avg_dividend_yield'] > 0:
+            dividend_insight = f"Ortalama Temettü Verimi %{financial_summary['avg_dividend_yield']:.2f} olarak gerçekleşmiştir."
+            insights.append(dividend_insight)
+        
+        insights.append(roe_insight)
+        
+        # Şirket bazlı en iyi performanslar
+        best_car = event_study_df.loc[event_study_df['CAR'].idxmax()]
+        best_car_insight = f"{best_car['Symbol']} şirketi %{best_car['CAR']*100:.2f} ile en yüksek anormal getiriyi sağlamıştır."
+        insights.append(best_car_insight)
+        
+        # En yüksek ROE
+        best_roe = financial_df.loc[financial_df['ROE'].idxmax()]
+        best_roe_insight = f"{best_roe['Symbol']} şirketi %{best_roe['ROE']:.1f} ile en yüksek özkaynak karlılığına sahiptir."
+        insights.append(best_roe_insight)
+        
+        # Event Study DataFrame'ini görüntüleme için hazırla
+        event_study_display = event_study_df.copy()
+        event_study_display['CAR'] = event_study_display['CAR'] * 100  # Yüzdeye çevir
+        event_study_display['P_Value'] = 1 - stats.norm.cdf(abs(event_study_display['CAR'] / event_study_display['Std_CAR']))
+        
+        return render_template('report.html',
+                             creation_date=creation_date,
+                             analyzed_companies=analyzed_companies,
+                             event_study_summary=event_study_summary,
+                             financial_summary=financial_summary,
+                             insights=insights,
+                             event_study_df=event_study_display.to_dict('records'),
+                             financial_df=financial_df.to_dict('records'))
+                             
     except Exception as e:
-        print(f"Rapor görüntüleme hatası: {str(e)}")
+        print(f"Rapor oluşturma hatası: {str(e)}")
         traceback.print_exc()
-        return render_template('report.html', 
-                              report_content=f"<div class='alert alert-danger'>Rapor yüklenirken bir hata oluştu: {str(e)}</div>",
-                              analysis_period="Belirtilmemiş",
-                              company_count=0,
-                              last_update=now,
-                              buyback_avg_car=0,
-                              dividend_avg_car=0,
-                              car_difference=0,
-                              buyback_car_change=0,
-                              dividend_car_change=0)
+        flash('Rapor oluşturulurken bir hata oluştu.', 'error')
+        return redirect(url_for('dashboard'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -2210,6 +1937,82 @@ def chart_data():
             }
         }
         return jsonify(default_data)
+
+@app.route('/api/results', methods=['GET'])
+def get_results_json():
+    """
+    Tüm analiz sonuçlarını JSON formatında döndürür.
+    """
+    try:
+        results_dir = os.path.join(PROJECT_ROOT, 'results')
+        
+        # Sonuç dosyalarının yolları
+        event_study_file = os.path.join(results_dir, 'event_study_all_summary.csv')
+        financial_file = os.path.join(results_dir, 'financial_analysis_summary.csv')
+        comparison_file = os.path.join(results_dir, 'buyback_vs_dividend_comparison.csv')
+        
+        response_data = {
+            "status": "success",
+            "event_study_results": [],
+            "financial_results": [],
+            "comparison_results": [],
+            "creation_date": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        
+        # 1. Olay Çalışması Sonuçları
+        if os.path.exists(event_study_file):
+            try:
+                df = pd.read_csv(event_study_file)
+                response_data["event_study_results"] = df.to_dict('records')
+            except Exception as e:
+                print(f"Olay çalışması verisi okuma hatası: {e}")
+        
+        # 2. Finansal Analiz Sonuçları
+        if os.path.exists(financial_file):
+            try:
+                df = pd.read_csv(financial_file)
+                response_data["financial_results"] = df.to_dict('records')
+            except Exception as e:
+                print(f"Finansal analiz verisi okuma hatası: {e}")
+        
+        # 3. Karşılaştırma Sonuçları
+        if os.path.exists(comparison_file):
+            try:
+                df = pd.read_csv(comparison_file)
+                response_data["comparison_results"] = df.to_dict('records')
+            except Exception as e:
+                print(f"Karşılaştırma verisi okuma hatası: {e}")
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/report-content')
+def get_report_content():
+    """
+    Rapor içeriğini markdown formatında döndürür.
+    """
+    try:
+        report_file = os.path.join(PROJECT_ROOT, 'report', 'final_report.md')
+        
+        if not os.path.exists(report_file):
+            # Rapor yoksa oluştur
+            from main import generate_report
+            generate_report()
+        
+        if os.path.exists(report_file):
+            with open(report_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            return content, 200, {'Content-Type': 'text/markdown'}
+        else:
+            return "Rapor bulunamadı.", 404
+            
+    except Exception as e:
+        return str(e), 500
 
 if __name__ == '__main__':
     # Gerekli dizinlerin kontrolü
