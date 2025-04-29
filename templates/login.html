@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap | FinVision</title>
+    <!-- Bootstrap 5.3 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800;900&display=swap">
+    
+    <style>
+        :root {
+            --primary-color: #5e35b1;
+            --secondary-color: #03a9f4;
+            --accent-color: #00e5ff;
+            --dark-color: #121212;
+            --light-color: #f5f5f7;
+            --text-color: #333333;
+            --text-light: #767676;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --gradient-primary: linear-gradient(135deg, #5e35b1, #3949ab);
+            --gradient-secondary: linear-gradient(135deg, #03a9f4, #00e5ff);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-color);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: url('https://images.unsplash.com/photo-1640340434855-6084b1f4901c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1280');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(94, 53, 177, 0.9), rgba(57, 73, 171, 0.8));
+            z-index: -1;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+        
+        .login-container {
+            max-width: 420px;
+            width: 90%;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .login-header p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        
+        .form-floating {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 12px 15px;
+            height: auto;
+            font-size: 0.95rem;
+            box-shadow: none !important;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .form-floating > label {
+            padding: 12px 15px;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            padding: 12px 15px;
+            font-weight: 500;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1.05rem;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(94, 53, 177, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(94, 53, 177, 0.4);
+        }
+        
+        .auth-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .auth-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .social-login {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .social-login p {
+            margin-bottom: 15px;
+            position: relative;
+            color: var(--text-light);
+        }
+        
+        .social-login p::before,
+        .social-login p::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .social-login p::before {
+            left: 0;
+        }
+        
+        .social-login p::after {
+            right: 0;
+        }
+        
+        .social-btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 10px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .social-btn i {
+            font-size: 1.3rem;
+        }
+        
+        .google-btn {
+            color: #DB4437;
+        }
+        
+        .facebook-btn {
+            color: #4267B2;
+        }
+        
+        .linkedin-btn {
+            color: #0077B5;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background-color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .show-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        
+        .floating-shapes div {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            backdrop-filter: blur(5px);
+        }
+        
+        .shape1 {
+            width: 150px;
+            height: 150px;
+            top: -75px;
+            left: 10%;
+            animation: float 15s ease-in-out infinite;
+        }
+        
+        .shape2 {
+            width: 100px;
+            height: 100px;
+            bottom: 10%;
+            right: 15%;
+            animation: float 12s ease-in-out infinite 2s;
+        }
+        
+        .shape3 {
+            width: 80px;
+            height: 80px;
+            bottom: 30%;
+            left: 15%;
+            animation: float 10s ease-in-out infinite 1s;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+            100% { transform: translateY(0) rotate(360deg); }
+        }
+        
+        @media (max-width: 576px) {
+            .login-container {
+                width: 95%;
+                padding: 30px 20px;
+            }
+            
+            .login-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .auth-links {
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape1"></div>
+        <div class="shape2"></div>
+        <div class="shape3"></div>
+    </div>
+    
+    <a href="/" class="back-btn">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Giriş Yap</h2>
+            <p>Hesabınıza erişmek için giriş yapın</p>
+        </div>
+        
+        <!-- Flash Mesajları -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form action="/login" method="post">
+            <div class="form-floating">
+                <input type="email" class="form-control" id="email" name="email" placeholder="E-posta adresi" required>
+                <label for="email">E-posta adresi</label>
+            </div>
+            
+            <div class="form-floating position-relative">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Şifre" required>
+                <label for="password">Şifre</label>
+                <span class="show-password" onclick="togglePassword()">
+                    <i class="bi bi-eye"></i>
+                </span>
+            </div>
+            
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" value="" id="rememberMe" name="rememberMe">
+                <label class="form-check-label" for="rememberMe">
+                    Beni hatırla
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+            
+            <div class="auth-links">
+                <a href="#">Şifremi unuttum</a>
+                <a href="/register">Hesap oluştur</a>
+            </div>
+        </form>
+        
+        <div class="social-login">
+            <p>veya şununla devam et</p>
+            <div>
+                <a href="#" class="social-btn google-btn">
+                    <i class="bi bi-google"></i>
+                </a>
+                <a href="#" class="social-btn facebook-btn">
+                    <i class="bi bi-facebook"></i>
+                </a>
+                <a href="#" class="social-btn linkedin-btn">
+                    <i class="bi bi-linkedin"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.querySelector('.show-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    </script>
+</body>
+</html> 

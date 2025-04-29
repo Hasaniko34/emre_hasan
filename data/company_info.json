@@ -1,0 +1,24 @@
+[
+    {
+        "ticker": "AAPL",
+        "name": "Apple Inc.",
+        "sector": "Technology",
+        "industry": "Consumer Electronics",
+        "country": "United States",
+        "market_cap": 3122568888320,
+        "pe_ratio": 32.994446,
+        "dividend_yield": 0.48,
+        "has_data": true
+    },
+    {
+        "ticker": "MSFT",
+        "name": "Microsoft Corporation",
+        "sector": "Technology",
+        "industry": "Software - Infrastructure",
+        "country": "United States",
+        "market_cap": 2883120267264,
+        "pe_ratio": 31.226246,
+        "dividend_yield": 0.85,
+        "has_data": true
+    }
+]

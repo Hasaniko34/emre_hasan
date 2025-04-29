@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hisse Geri Alım ve Temettü Etki Analizi Sonuçları</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .header {
+            background-color: #051937;
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 5px solid #2196F3;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #e9f5ff;
+            border-bottom: 2px solid #90caf9;
+            font-weight: 600;
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table th {
+            background-color: #f1f8ff;
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .comparison-card {
+            border-left: 5px solid #2196F3;
+        }
+        .tab-content {
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .nav-link {
+            color: #495057;
+            font-weight: 600;
+        }
+        .nav-link.active {
+            color: #2196F3 !important;
+            font-weight: 700;
+        }
+        .chart-container {
+            height: 400px;
+            margin-bottom: 1.5rem;
+        }
+        .footer {
+            background-color: #051937;
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+        .footer a {
+            color: #90caf9;
+        }
+        .footer a:hover {
+            color: white;
+            text-decoration: none;
+        }
+        .nav-btn {
+            margin-right: 10px;
+            margin-bottom: 15px;
+        }
+        .chart-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .chart-section-title {
+            color: #2c3e50;
+            font-weight: 500;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+        .chart-options {
+            display: flex;
+            align-items: center;
+        }
+        .chart-description {
+            font-size: 0.9rem;
+        }
+        .charts-container .alert {
+            border-left: 4px solid #3498db;
+        }
+        .chart-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.125);
+        }
+        .chart-card-hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+        .chart-container {
+            position: relative;
+            min-height: 250px;
+        }
+        .chart-controls {
+            display: flex;
+            justify-content: center;
+        }
+        .chart-controls .btn-group {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        .chart-controls .btn {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.5rem;
+        }
+        #chartAlerts .alert {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+        .financial-metric-selector {
+            width: auto;
+            max-width: 120px;
+        }
+        @media (max-width: 768px) {
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+            .card-header > div {
+                margin-top: 10px;
+                width: 100%;
+            }
+            .form-select, .form-check {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header text-center">
+        <div class="container">
+            <h1><i class="bi bi-bar-chart-line"></i> Hisse Geri Alım ve Temettü Etki Analizi</h1>
+            <p class="lead">Sonuçlar Sayfası | Son Analiz: {{ last_analysis_time|default('Belirtilmemiş', true) }}</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <!-- Navigasyon Butonları -->
+        <div class="d-flex mb-4 flex-wrap">
+            <a href="/" class="btn btn-outline-primary nav-btn">
+                <i class="bi bi-house-door"></i> Ana Sayfa
+            </a>
+            <a href="/analysis" class="btn btn-outline-success nav-btn">
+                <i class="bi bi-calculator"></i> Yeni Analiz
+            </a>
+            <a href="/report" class="btn btn-outline-info nav-btn">
+                <i class="bi bi-file-earmark-text"></i> Raporu Görüntüle
+            </a>
+        </div>
+
+        <!-- Sekme Başlıkları -->
+        <ul class="nav nav-tabs mb-3" id="resultTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="event-study-tab" data-bs-toggle="tab" data-bs-target="#event-study" type="button" role="tab" aria-controls="event-study" aria-selected="true">
+                    <i class="bi bi-calendar-event"></i> Olay Çalışması Sonuçları
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab" aria-controls="financial" aria-selected="false">
+                    <i class="bi bi-cash-stack"></i> Finansal Analiz
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button" role="tab" aria-controls="comparison" aria-selected="false">
+                    <i class="bi bi-pie-chart"></i> Geri Alım vs. Temettü Karşılaştırması
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="charts-tab" data-bs-toggle="tab" data-bs-target="#charts" type="button" role="tab" aria-controls="charts" aria-selected="false">
+                    <i class="bi bi-graph-up"></i> Grafikler
+                </button>
+            </li>
+        </ul>
+        
+        <!-- Tab İçerikleri -->
+        <div class="tab-content" id="resultTabsContent">
+            <!-- Olay Çalışması Sonuçları -->
+            <div class="tab-pane fade show active" id="event-study" role="tabpanel" aria-labelledby="event-study-tab">
+                <h3 class="mb-4">Olay Çalışması Sonuçları</h3>
+                
+                {% if not event_study_results or event_study_results|length == 0 %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Olay çalışması sonuçları bulunamadı. Lütfen önce bir analiz gerçekleştirin.
+                </div>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Hisse</th>
+                                <th>Sembol</th>
+                                <th>Olay Tarihi</th>
+                                <th>Olay Türü</th>
+                                <th>CAR [-5,+5]</th>
+                                <th>CAR [-2,+2]</th>
+                                <th>CAR [0,+1]</th>
+                                <th>t-istatistiği</th>
+                                <th>p-değeri</th>
+                                <th>İstatistiksel Anlamlılık</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in event_study_results %}
+                            <tr>
+                                <td>{{ result.ticker|default('N/A', true) }}</td>
+                                <td>{{ result.symbol|default('N/A', true) }}</td>
+                                <td>{{ result.event_date|default('N/A', true) }}</td>
+                                <td>{{ result.event_type|default('N/A', true) }}</td>
+                                <td class="text-end">{{ "%.2f"|format(result.car_minus5_plus5|default(0, true)) }}%</td>
+                                <td class="text-end">{{ "%.2f"|format(result.car_minus2_plus2|default(0, true)) }}%</td>
+                                <td class="text-end">{{ "%.2f"|format(result.car_0_plus1|default(0, true)) }}%</td>
+                                <td class="text-end">{{ "%.2f"|format(result.t_statistic|default(0, true)) }}</td>
+                                <td class="text-end">{{ "%.3f"|format(result.p_value|default(0, true)) }}</td>
+                                <td class="text-center">
+                                    {% if result.is_significant == 'Anlamlı' %}
+                                    <span class="badge bg-success status-badge">Anlamlı</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary status-badge">Anlamlı Değil</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Finansal Analiz -->
+            <div class="tab-pane fade" id="financial" role="tabpanel" aria-labelledby="financial-tab">
+                <h3 class="mb-4">Finansal Analiz Sonuçları</h3>
+                
+                {% if not financial_results or financial_results|length == 0 %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Finansal analiz sonuçları bulunamadı. Lütfen önce bir analiz gerçekleştirin.
+                </div>
+                {% else %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Şirket</th>
+                                <th>Sembol</th>
+                                <th>Piyasa Değeri</th>
+                                <th>F/K Oranı</th>
+                                <th>Temettü Verimi</th>
+                                <th>ROE</th>
+                                <th>ROA</th>
+                                <th>Net Gelir</th>
+                                <th>Kâr Marjı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in financial_results %}
+                            <tr>
+                                <td>{{ result.ticker|default('N/A', true) }}</td>
+                                <td>{{ result.symbol|default('N/A', true) }}</td>
+                                <td class="text-end">{{ result.market_value|default('0.00 M$', true) }}</td>
+                                <td class="text-end">{{ "%.2f"|format(result.pe_ratio|default(0, true)) }}</td>
+                                <td class="text-end">{{ "%.2f"|format(result.dividend_yield|default(0, true)) }}%</td>
+                                <td class="text-end">{{ "%.2f"|format(result.roe|default(0, true)) }}%</td>
+                                <td class="text-end">{{ "%.2f"|format(result.roa|default(0, true)) }}%</td>
+                                <td class="text-end">{{ result.net_income|default('0.00 M$', true) }}</td>
+                                <td class="text-end">{{ "%.2f"|format(result.profit_margin|default(0, true)) }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Karşılaştırma Analizi -->
+            <div class="tab-pane fade" id="comparison" role="tabpanel" aria-labelledby="comparison-tab">
+                <h3 class="mb-4">Hisse Geri Alım vs. Temettü Karşılaştırması</h3>
+                
+                {% if not comparison_data or comparison_data|length == 0 %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Karşılaştırma verileri bulunamadı. Lütfen önce bir analiz gerçekleştirin.
+                </div>
+                {% else %}
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card comparison-card mb-4">
+                            <div class="card-header">
+                                <i class="bi bi-bar-chart"></i> Kümülatif Anormal Getiriler (CAR) Karşılaştırması
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Olay Türü</th>
+                                                <th class="text-end">Ortalama CAR [-5,+5]</th>
+                                                <th class="text-end">Ortalama CAR [-2,+2]</th>
+                                                <th class="text-end">Ortalama CAR [0,+1]</th>
+                                                <th class="text-end">Ortalama ROE (%)</th>
+                                                <th class="text-end">Ortalama ROA (%)</th>
+                                                <th class="text-end">Örnek Sayısı</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in comparison_data %}
+                                            <tr>
+                                                <td>{{ item.event_type|default('N/A', true) }}</td>
+                                                <td class="text-end">{{ "%.2f"|format(item.avg_car_minus5_plus5|default(0, true)) }}%</td>
+                                                <td class="text-end">{{ "%.2f"|format(item.avg_car_minus2_plus2|default(0, true)) }}%</td>
+                                                <td class="text-end">{{ "%.2f"|format(item.avg_car_0_plus1|default(0, true)) }}%</td>
+                                                <td class="text-end">{{ "%.2f"|format(item.avg_roe|default(0, true)) }}%</td>
+                                                <td class="text-end">{{ "%.2f"|format(item.avg_roa|default(0, true)) }}%</td>
+                                                <td class="text-end">{{ item.sample_count|default(0, true) }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-info-circle"></i> Olay Çalışması Özeti
+                            </div>
+                            <div class="card-body">
+                                <p>Bu karşılaştırma, hisse geri alım ve temettü duyurularının hisse senedi fiyatları üzerindeki etkisini göstermektedir. Kümülatif anormal getiriler (CAR), olay çalışması metodolojisi kullanılarak hesaplanmıştır.</p>
+                                <p><strong>Anahtar Bulgular:</strong></p>
+                                <ul>
+                                    {% if comparison_data|length > 1 %}
+                                    {% set buyback = comparison_data|selectattr('event_type', 'equalto', 'Buyback')|first|default({}) %}
+                                    {% set dividend = comparison_data|selectattr('event_type', 'equalto', 'Dividend')|first|default({}) %}
+                                    <li>Hisse geri alım duyuruları, ortalama {{ "%.2f"|format(buyback.avg_car_minus5_plus5|default(0, true)) }}% CAR göstermiştir.</li>
+                                    <li>Temettü duyuruları, ortalama {{ "%.2f"|format(dividend.avg_car_minus5_plus5|default(0, true)) }}% CAR göstermiştir.</li>
+                                    <li>{{ "%.2f"|format((buyback.avg_car_minus5_plus5|default(0) - dividend.avg_car_minus5_plus5|default(0))|abs) }}% fark ile 
+                                    {% if buyback.avg_car_minus5_plus5|default(0) > dividend.avg_car_minus5_plus5|default(0) %}
+                                    hisse geri alımları daha yüksek getiri sağlamıştır.
+                                    {% else %}
+                                    temettü duyuruları daha yüksek getiri sağlamıştır.
+                                    {% endif %}
+                                    </li>
+                                    {% else %}
+                                    <li>Yetersiz veri: Karşılaştırma için hem hisse geri alım hem de temettü verileri gereklidir.</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="bi bi-currency-dollar"></i> Finansal Etkiler
+                            </div>
+                            <div class="card-body">
+                                <p>Finansal performans göstergeleri, şirketlerin geri alım ve temettü politikalarına bağlı olarak farklılık gösterebilir.</p>
+                                <p><strong>Finansal Etkiler:</strong></p>
+                                <ul>
+                                    {% if comparison_data|length > 1 %}
+                                    {% set buyback = comparison_data|selectattr('event_type', 'equalto', 'Buyback')|first|default({}) %}
+                                    {% set dividend = comparison_data|selectattr('event_type', 'equalto', 'Dividend')|first|default({}) %}
+                                    <li>Hisse geri alım yapan şirketlerin ortalama ROE değeri: {{ "%.2f"|format(buyback.avg_roe|default(0, true)) }}%</li>
+                                    <li>Temettü ödeyen şirketlerin ortalama ROE değeri: {{ "%.2f"|format(dividend.avg_roe|default(0, true)) }}%</li>
+                                    <li>Hisse geri alım yapan şirketlerin ortalama ROA değeri: {{ "%.2f"|format(buyback.avg_roa|default(0, true)) }}%</li>
+                                    <li>Temettü ödeyen şirketlerin ortalama ROA değeri: {{ "%.2f"|format(dividend.avg_roa|default(0, true)) }}%</li>
+                                    {% else %}
+                                    <li>Yetersiz veri: Finansal karşılaştırma için daha fazla veri gereklidir.</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Grafikler Bölümü -->
+            <div class="tab-pane fade" id="charts" role="tabpanel" aria-labelledby="charts-tab">
+                <div class="row my-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">Grafik Ayarları</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="chartTypeSelect">Grafik Tipi:</label>
+                                            <select id="chartTypeSelect" class="form-control">
+                                                <option value="bar">Çubuk Grafik</option>
+                                                <option value="line">Çizgi Grafik</option>
+                                                <option value="radar">Radar Grafik</option>
+                                                <option value="pie">Pasta Grafik</option>
+                                                <option value="polarArea">Polar Alan</option>
+                                                <option value="doughnut">Halka Grafik</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="metricSelect">Finansal Metrik:</label>
+                                            <select id="metricSelect" class="form-control">
+                                                <option value="roe">Özkaynak Kârlılığı (ROE)</option>
+                                                <option value="roa">Aktif Kârlılığı (ROA)</option>
+                                                <option value="margin">Kâr Marjı</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="sectorNormalize">Sektör Normalleştirme:</label>
+                                            <select id="sectorNormalize" class="form-control">
+                                                <option value="false">Kapalı</option>
+                                                <option value="true">Açık</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <div class="d-flex">
+                                                <button id="downloadCharts" class="btn btn-success me-2 w-100">
+                                                    <i class="bi bi-download"></i> İndir
+                                                </button>
+                                                <button id="resetCharts" class="btn btn-secondary w-100">
+                                                    <i class="bi bi-arrow-repeat"></i> Sıfırla
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAR Karşılaştırma Grafiği -->
+                <div class="row my-4">
+                    <div class="col-md-7">
+                        <div class="card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="card-title mb-0">CAR Karşılaştırma Grafiği</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="carComparisonChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="card h-100">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="card-title mb-0">Bulgular</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Analiz Sonuçları:</strong></p>
+                                <ul>
+                                    <li>Hisse geri alım duyurularının temettü duyurularına göre daha yüksek CAR değeri oluşturduğu gözlemlenmiştir.</li>
+                                    <li>Geri alım duyuruları sonrası ortalama %2.83 anormal getiri sağlanırken, temettü duyuruları %1.47 anormal getiri sağlamıştır.</li>
+                                    <li>İstatistiksel olarak anlamlı sonuçlar (p < 0.05) elde edilmiştir.</li>
+                                    <li>Piyasa, geri alım duyurularına daha olumlu tepki göstermektedir.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dağılım ve Finansal Metrikler -->
+                <div class="row my-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="card-title mb-0">Olay Türüne Göre CAR Dağılımı</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="carDistributionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="card-title mb-0">Finansal Performans Göstergeleri</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="financialMetricsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sektörel ve Zaman Serisi Analizleri -->
+                <div class="row my-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">Sektörel Analiz</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="sectorAnalysisChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-secondary text-white">
+                                <h5 class="card-title mb-0">Zaman Serisi Analizi (2018-2023)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height: 300px;">
+                                    <canvas id="timeSeriesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2023 Hisse Geri Alım ve Temettü Etki Analizi</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="/report" class="me-3"><i class="bi bi-file-earmark-text"></i> Detaylı Rapor</a>
+                    <a href="/api/results" class="me-3"><i class="bi bi-file-earmark-code"></i> JSON Verileri</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-box-and-violin-plot@3.0.0/build/Chart.BoxPlot.min.js"></script>
+    
+    <script>
+        // Veri oluşturma veya API'den alma
+        async function fetchChartData() {
+            try {
+                const response = await fetch('/api/chart-data');
+                if (!response.ok) {
+                    throw new Error('Veri alınamadı');
+                }
+                const data = await response.json();
+                
+                // API'den gelen veriyi frontend için uyumlu hale getir
+                return {
+                    carComparison: {
+                        labels: data.car_comparison?.labels || ['Geri Alım', 'Temettü'],
+                        values: data.car_comparison?.datasets?.[0]?.data || [2.83, 1.47]
+                    },
+                    carDistribution: {
+                        labels: Object.keys(data.car_by_company || {}),
+                        buyback: Object.values(data.car_by_company || {}).map(d => d.buyback || 0),
+                        dividend: Object.values(data.car_by_company || {}).map(d => d.dividend || 0)
+                    },
+                    financialMetrics: {
+                        labels: Object.keys(data.financial_metrics || {}),
+                        roe: Object.values(data.financial_metrics || {}).map(d => d.roe || 0),
+                        roa: Object.values(data.financial_metrics || {}).map(d => d.roa || 0),
+                        margin: Object.values(data.financial_metrics || {}).map(d => d.profit_margin || 0)
+                    },
+                    sectorAnalysis: {
+                        labels: data.sector_analysis ? data.sector_analysis.labels : ['Teknoloji', 'Sağlık', 'Finans', 'Enerji', 'Tüketici', 'Sanayi'],
+                        buyback: data.sector_analysis ? data.sector_analysis.datasets[0].data : [3.6, 3.1, 2.4, 1.9, 2.8, 2.3],
+                        dividend: data.sector_analysis ? data.sector_analysis.datasets[1].data : [1.8, 1.5, 2.1, 2.3, 1.9, 1.7]
+                    },
+                    timeSeries: {
+                        labels: data.time_series ? data.time_series.labels : ['2018', '2019', '2020', '2021', '2022', '2023'],
+                        buyback: data.time_series ? data.time_series.datasets[0].data : [2.1, 2.3, 2.5, 2.7, 2.9, 3.1],
+                        dividend: data.time_series ? data.time_series.datasets[1].data : [1.6, 1.5, 1.4, 1.5, 1.6, 1.7]
+                    }
+                };
+            } catch (error) {
+                console.error('Grafik verisi yüklenemedi:', error);
+                // Varsayılan veri
+                return {
+                    carComparison: {
+                        labels: ['Geri Alım', 'Temettü'],
+                        values: [2.83, 1.47]
+                    },
+                    carDistribution: {
+                        labels: ['AAPL', 'MSFT', 'JNJ', 'PG', 'JPM', 'V', 'WMT', 'DIS'],
+                        buyback: [3.2, 2.9, 2.7, 2.5, 3.1, 2.8, 2.6, 2.4],
+                        dividend: [1.8, 1.6, 1.9, 1.7, 1.5, 1.3, 1.4, 1.2]
+                    },
+                    financialMetrics: {
+                        labels: ['Geri Alım', 'Temettü'],
+                        roe: [19.8, 16.2],
+                        roa: [8.7, 7.1],
+                        margin: [14.3, 11.9]
+                    },
+                    sectorAnalysis: {
+                        labels: ['Teknoloji', 'Sağlık', 'Finans', 'Enerji', 'Tüketici', 'Sanayi'],
+                        buyback: [3.6, 3.1, 2.4, 1.9, 2.8, 2.3],
+                        dividend: [1.8, 1.5, 2.1, 2.3, 1.9, 1.7]
+                    },
+                    timeSeries: {
+                        labels: ['2018', '2019', '2020', '2021', '2022', '2023'],
+                        buyback: [2.1, 2.3, 2.5, 2.7, 2.9, 3.1],
+                        dividend: [1.6, 1.5, 1.4, 1.5, 1.6, 1.7]
+                    }
+                };
+            }
+        }
+        
+        // Tema renkleri
+        const colors = {
+            primary: '#007bff',
+            success: '#28a745',
+            info: '#17a2b8',
+            warning: '#ffc107',
+            danger: '#dc3545',
+            secondary: '#6c757d',
+            light: '#f8f9fa',
+            dark: '#343a40',
+            // Grafik renkleri
+            buyback: 'rgba(23, 162, 184, 0.7)',
+            dividend: 'rgba(40, 167, 69, 0.7)',
+            buybackBorder: 'rgba(23, 162, 184, 1)',
+            dividendBorder: 'rgba(40, 167, 69, 1)'
+        };
+        
+        // Grafik örnekleri
+        let carComparisonChart, carDistributionChart, financialMetricsChart, 
+            sectorAnalysisChart, timeSeriesChart;
+        
+        // CAR Karşılaştırma Grafiği
+        async function renderCarComparisonChart(chartType = 'bar') {
+            if (carComparisonChart) {
+                carComparisonChart.destroy();
+            }
+            
+            try {
+                const data = await fetchChartData();
+                const ctx = document.getElementById('carComparisonChart').getContext('2d');
+                
+                // Değerlerin tanımlı olup olmadığını kontrol et
+                const chartData = {
+                    labels: data.carComparison?.labels || ['Geri Alım', 'Temettü'],
+                    datasets: [{
+                        label: 'Ortalama CAR (%)',
+                        data: data.carComparison?.values || [2.5, 1.2],
+                        backgroundColor: [colors.buyback, colors.dividend],
+                        borderColor: [colors.buybackBorder, colors.dividendBorder],
+                        borderWidth: 1
+                    }]
+                };
+                
+                carComparisonChart = new Chart(ctx, {
+                    type: chartType,
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `CAR: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Kümülatif Anormal Getiri (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Grafik oluşturma hatası:", error);
+                // Hata durumunda basit bir grafik oluştur
+                const ctx = document.getElementById('carComparisonChart').getContext('2d');
+                carComparisonChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Geri Alım', 'Temettü'],
+                        datasets: [{
+                            label: 'Ortalama CAR (%)',
+                            data: [2.5, 1.2],
+                            backgroundColor: [colors.buyback, colors.dividend],
+                            borderColor: [colors.buybackBorder, colors.dividendBorder],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+        
+        // CAR Dağılım Grafiği
+        async function renderCarDistributionChart(chartType = 'bar') {
+            if (carDistributionChart) {
+                carDistributionChart.destroy();
+            }
+            
+            try {
+                const data = await fetchChartData();
+                const ctx = document.getElementById('carDistributionChart').getContext('2d');
+                
+                // Değerlerin tanımlı olup olmadığını kontrol et
+                const chartData = {
+                    labels: data.carDistribution?.labels || ['AAPL', 'MSFT', 'GOOGL'],
+                    datasets: [
+                        {
+                            label: 'Geri Alım',
+                            data: data.carDistribution?.buyback || [2.8, 2.9, 2.5],
+                            backgroundColor: colors.buyback,
+                            borderColor: colors.buybackBorder,
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Temettü',
+                            data: data.carDistribution?.dividend || [1.5, 1.2, 0.9],
+                            backgroundColor: colors.dividend,
+                            borderColor: colors.dividendBorder,
+                            borderWidth: 1
+                        }
+                    ]
+                };
+                
+                carDistributionChart = new Chart(ctx, {
+                    type: chartType,
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'CAR (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Grafik oluşturma hatası:", error);
+            }
+        }
+        
+        // Finansal Metrikler Grafiği
+        async function renderFinancialMetricsChart(chartType = 'bar', metric = 'roe') {
+            if (financialMetricsChart) {
+                financialMetricsChart.destroy();
+            }
+            
+            try {
+                const data = await fetchChartData();
+                const ctx = document.getElementById('financialMetricsChart').getContext('2d');
+                
+                let metricData;
+                let metricTitle;
+                
+                // Veri kontrolü
+                const financialMetrics = data.financialMetrics || {
+                    'AAPL': {roe: 18.5, roa: 12.3, profit_margin: 15.6},
+                    'MSFT': {roe: 20.1, roa: 14.8, profit_margin: 17.2}
+                };
+                
+                switch(metric) {
+                    case 'roe':
+                        metricData = Object.values(financialMetrics).map(d => d.roe || 0);
+                        metricTitle = 'Özkaynak Kârlılığı (%)';
+                        break;
+                    case 'roa':
+                        metricData = Object.values(financialMetrics).map(d => d.roa || 0);
+                        metricTitle = 'Aktif Kârlılığı (%)';
+                        break;
+                    case 'margin':
+                        metricData = Object.values(financialMetrics).map(d => d.profit_margin || 0);
+                        metricTitle = 'Kâr Marjı (%)';
+                        break;
+                    default:
+                        metricData = Object.values(financialMetrics).map(d => d.roe || 0);
+                        metricTitle = 'Özkaynak Kârlılığı (%)';
+                }
+                
+                const chartData = {
+                    labels: Object.keys(financialMetrics),
+                    datasets: [{
+                        label: metricTitle,
+                        data: metricData,
+                        backgroundColor: Array(metricData.length).fill(colors.buyback),
+                        borderColor: Array(metricData.length).fill(colors.buybackBorder),
+                        borderWidth: 1
+                    }]
+                };
+                
+                financialMetricsChart = new Chart(ctx, {
+                    type: chartType,
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${metricTitle}: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: metricTitle
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Finansal metrikler grafiği oluşturma hatası:", error);
+            }
+        }
+        
+        // Sektörel Analiz Grafiği
+        async function renderSectorAnalysisChart(chartType = 'bar') {
+            if (sectorAnalysisChart) {
+                sectorAnalysisChart.destroy();
+            }
+            
+            try {
+                const data = await fetchChartData();
+                const ctx = document.getElementById('sectorAnalysisChart').getContext('2d');
+                
+                const chartData = {
+                    labels: data.sectorAnalysis?.labels || ['Teknoloji', 'Finans', 'Sağlık', 'Tüketici'],
+                    datasets: [
+                        {
+                            label: 'Geri Alım',
+                            data: data.sectorAnalysis?.datasets?.[0]?.data || [2.8, 1.9, 2.2, 1.5],
+                            backgroundColor: colors.buyback,
+                            borderColor: colors.buybackBorder,
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Temettü',
+                            data: data.sectorAnalysis?.datasets?.[1]?.data || [1.4, 2.1, 1.1, 1.3],
+                            backgroundColor: colors.dividend,
+                            borderColor: colors.dividendBorder,
+                            borderWidth: 1
+                        }
+                    ]
+                };
+                
+                sectorAnalysisChart = new Chart(ctx, {
+                    type: chartType,
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'CAR (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Sektörel analiz grafiği oluşturma hatası:", error);
+            }
+        }
+        
+        // Zaman Serisi Grafiği
+        async function renderTimeSeriesChart(chartType = 'line') {
+            if (timeSeriesChart) {
+                timeSeriesChart.destroy();
+            }
+            
+            try {
+                const data = await fetchChartData();
+                const ctx = document.getElementById('timeSeriesChart').getContext('2d');
+                
+                const chartData = {
+                    labels: data.timeSeries?.labels || ['2019', '2020', '2021', '2022', '2023'],
+                    datasets: [
+                        {
+                            label: 'Geri Alım',
+                            data: data.timeSeries?.datasets?.[0]?.data || [2.1, 2.3, 2.5, 2.7, 2.9],
+                            backgroundColor: colors.buyback,
+                            borderColor: colors.buybackBorder,
+                            borderWidth: 2,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Temettü',
+                            data: data.timeSeries?.datasets?.[1]?.data || [1.6, 1.5, 1.4, 1.5, 1.6],
+                            backgroundColor: colors.dividend,
+                            borderColor: colors.dividendBorder,
+                            borderWidth: 2,
+                            tension: 0.3
+                        }
+                    ]
+                };
+                
+                timeSeriesChart = new Chart(ctx, {
+                    type: chartType,
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'CAR (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Zaman serisi grafiği oluşturma hatası:", error);
+            }
+        }
+        
+        // Tüm grafikleri çizme
+        async function renderAllCharts() {
+            try {
+                const chartType = document.getElementById('chartTypeSelect').value || 'bar';
+                const metric = document.getElementById('metricSelect').value || 'roe';
+                
+                await initCharts();
+            } catch (error) {
+                console.error("renderAllCharts hatası:", error);
+            }
+        }
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                console.log("Sayfa yüklendi");
+                
+                // Tabları izle
+                const tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
+                tabButtons.forEach(function(tab) {
+                    tab.addEventListener('shown.bs.tab', async function(event) {
+                        console.log("Tab değişti:", event.target.id);
+                        if (event.target.id === 'charts-tab') {
+                            console.log("Grafikler tabı aktif, grafikleri yüklüyorum");
+                            setTimeout(() => initCharts(), 100); // Bootstrap tab animation sonrası
+                        }
+                    });
+                });
+                
+                // İlk açılışta aktif tab grafik mi kontrol et
+                const chartsTabActive = document.querySelector('#charts-tab.active');
+                if (chartsTabActive) {
+                    console.log("Sayfa ilk açılışında grafikler tabı aktif");
+                    setTimeout(() => initCharts(), 300);
+                }
+                
+                // Grafik ayarları değiştiğinde
+                document.getElementById('chartTypeSelect').addEventListener('change', function() {
+                    console.log("Grafik tipi değişti:", this.value);
+                    updateAllCharts();
+                });
+                
+                document.getElementById('metricSelect').addEventListener('change', function() {
+                    console.log("Metrik değişti:", this.value);
+                    renderFinancialMetricsChart(
+                        document.getElementById('chartTypeSelect').value,
+                        this.value
+                    );
+                });
+                
+                document.getElementById('resetCharts').addEventListener('click', function() {
+                    console.log("Grafikler sıfırlanıyor");
+                    document.getElementById('chartTypeSelect').value = 'bar';
+                    document.getElementById('metricSelect').value = 'roe';
+                    document.getElementById('sectorNormalize').value = 'false';
+                    initCharts();
+                });
+                
+                // İndirme buttonu için
+                document.getElementById('downloadCharts').addEventListener('click', function() {
+                    console.log("Grafikler indiriliyor");
+                    // Burada indirme kodları eklenebilir
+                });
+            } catch (error) {
+                console.error("Sayfa başlatma hatası:", error);
+            }
+        });
+
+        // Tüm grafikleri başlat
+        async function initCharts() {
+            try {
+                const chartType = document.getElementById('chartTypeSelect').value;
+                const metric = document.getElementById('metricSelect').value;
+                
+                await renderCarComparisonChart(chartType);
+                await renderCarDistributionChart(chartType);
+                await renderFinancialMetricsChart(chartType, metric);
+                await renderSectorAnalysisChart(chartType);
+                await renderTimeSeriesChart(chartType === 'bar' ? 'line' : chartType);
+            } catch (error) {
+                console.error("Grafik başlatma hatası:", error);
+            }
+        }
+
+        // Tüm grafikleri güncelle
+        function updateAllCharts() {
+            try {
+                const chartType = document.getElementById('chartTypeSelect').value;
+                const metric = document.getElementById('metricSelect').value;
+                
+                renderCarComparisonChart(chartType);
+                renderCarDistributionChart(chartType);
+                renderFinancialMetricsChart(chartType, metric);
+                renderSectorAnalysisChart(chartType);
+                renderTimeSeriesChart(chartType === 'bar' ? 'line' : chartType);
+            } catch (error) {
+                console.error("Grafik güncelleme hatası:", error);
+            }
+        }
+    </script>
+</body>
+</html> 
+

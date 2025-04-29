@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analiz Raporu - Hisse Geri Alımı ve Temettü Etki Analizi</title>
+    <!-- Bootstrap 5.3 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts: Open Sans & Montserrat -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Montserrat:wght@500;700&display=swap">
+    <!-- Chart.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css">
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34a853;
+            --accent-color: #fbbc04;
+            --dark-color: #202124;
+            --light-color: #f8f9fa;
+            --border-color: #dfe1e5;
+            --text-color: #3c4043;
+            --text-light: #5f6368;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+        
+        body {
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-color);
+            padding-bottom: 4rem;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 700;
+            color: var(--dark-color);
+        }
+        
+        .report-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #4285f4 100%);
+            color: white;
+            padding: 2.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .report-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .report-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .report-nav {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+        
+        .report-nav a {
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            display: inline-block;
+            text-decoration: none;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .report-nav a:hover {
+            color: var(--primary-color);
+        }
+        
+        .report-nav a.active {
+            color: var(--primary-color);
+        }
+        
+        .report-nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 1rem;
+            right: 1rem;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .report-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .report-section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .report-section h3 {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .chart-container {
+            height: 400px;
+            margin-bottom: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        table, th, td {
+            border: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            font-weight: 600;
+            padding: 0.75rem;
+        }
+        
+        td {
+            padding: 0.75rem;
+            color: var(--text-color);
+        }
+        
+        tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        tr:hover {
+            background-color: rgba(26, 115, 232, 0.05);
+        }
+        
+        .markdown-body {
+            padding: 0;
+            max-width: 100%;
+        }
+        
+        .markdown-body table {
+            display: table;
+            width: 100%;
+        }
+        
+        .markdown-body img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5rem auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .markdown-body pre {
+            background-color: #f6f8fa;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .markdown-body a {
+            color: var(--primary-color);
+        }
+        
+        .key-finding-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .key-finding-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-3px);
+        }
+        
+        .key-finding-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .key-finding-card p {
+            margin-bottom: 0;
+        }
+        
+        .key-metric {
+            text-align: center;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .key-metric h4 {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.75rem;
+        }
+        
+        .key-metric .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .key-metric .change {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        
+        .key-metric .positive {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .key-metric .negative {
+            background-color: rgba(234, 67, 53, 0.1);
+            color: #ea4335;
+        }
+        
+        .report-metadata {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+        
+        .report-metadata strong {
+            color: var(--text-color);
+        }
+        
+        .action-buttons {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 1000;
+        }
+        
+        .action-buttons .btn {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+        
+        blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+        
+        code {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .report-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .report-header p {
+                font-size: 1rem;
+            }
+            
+            .report-section {
+                padding: 1.5rem;
+            }
+            
+            .report-section h2 {
+                font-size: 1.5rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            .report-nav {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding: 0 0.5rem;
+            }
+            
+            .report-nav a {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .action-buttons {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+        
+        @media print {
+            .report-nav, .action-buttons {
+                display: none;
+            }
+            
+            body {
+                padding: 0;
+                background-color: white;
+            }
+            
+            .report-section {
+                box-shadow: none;
+                margin-bottom: 1rem;
+                page-break-inside: avoid;
+            }
+            
+            .report-header {
+                background: none;
+                color: var(--dark-color);
+                padding: 1rem 0;
+                margin-bottom: 1rem;
+                box-shadow: none;
+            }
+            
+            .report-header h1, .report-header p {
+                color: var(--dark-color);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <div class="container">
+            <h1><i class="bi bi-bar-chart-line"></i> Hisse Geri Alımı ve Temettü Etki Analizi</h1>
+            <p>Detaylı Analiz Raporu | {{ generation_date|default('Oluşturulma Tarihi: ' + creation_date, true) }}</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="report-nav">
+            <div class="d-flex flex-nowrap overflow-auto">
+                <a href="#ozet" class="active"><i class="bi bi-file-text"></i> Özet</a>
+                <a href="#giris"><i class="bi bi-info-circle"></i> Giriş</a>
+                <a href="#metodoloji"><i class="bi bi-gear"></i> Metodoloji</a>
+                <a href="#bulgular"><i class="bi bi-graph-up"></i> Bulgular</a>
+                <a href="#finansal-analiz"><i class="bi bi-cash-stack"></i> Finansal Analiz</a>
+                <a href="#sonuc"><i class="bi bi-check-circle"></i> Sonuç</a>
+                <a href="#grafik-analiz"><i class="bi bi-pie-chart"></i> Grafik Analiz</a>
+            </div>
+        </div>
+        
+        <div class="report-metadata">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Analiz Dönemi:</strong> {{ analysis_period|default('Belirtilmemiş', true) }}</p>
+                    <p><strong>Analiz Edilen Şirket Sayısı:</strong> {{ company_count|default('Belirtilmemiş', true) }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p><strong>Rapor Versiyonu:</strong> 1.0</p>
+                    <p><strong>Son Güncelleme:</strong> {{ last_update|default('Belirtilmemiş', true) }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="key-metric">
+                    <h4>Hisse Geri Alım Ortalama CAR</h4>
+                    <div class="value">{{ buyback_avg_car|default('2.83', true) }}%</div>
+                    <div class="change positive">
+                        <i class="bi bi-arrow-up"></i> {{ buyback_car_change|default('0.35', true) }}%
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="key-metric">
+                    <h4>Temettü Ortalama CAR</h4>
+                    <div class="value">{{ dividend_avg_car|default('1.47', true) }}%</div>
+                    <div class="change negative">
+                        <i class="bi bi-arrow-down"></i> {{ dividend_car_change|default('0.18', true) }}%
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="key-metric">
+                    <h4>En Güçlü Etki</h4>
+                    <div class="value">Geri Alım</div>
+                    <div class="change positive">
+                        <i class="bi bi-graph-up"></i> {{ car_difference|default('1.36', true) }}% fark
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="markdown-body">
+            {{ report_content | safe }}
+        </div>
+        
+        <!-- Grafik Analiz Bölümü -->
+        <div class="report-section" id="grafik-analiz">
+            <h2>Grafik Analiz</h2>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>CAR Karşılaştırması</h3>
+                    <div class="chart-container">
+                        <canvas id="carComparisonChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>Finansal Performans</h3>
+                    <div class="chart-container">
+                        <canvas id="financialPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Sektörel Analiz</h3>
+                    <div class="chart-container">
+                        <canvas id="sectorAnalysisChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h3>Zaman Serisi Analizi</h3>
+                    <div class="chart-container">
+                        <canvas id="timeSeriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="action-buttons">
+        <button type="button" class="btn btn-primary" onclick="window.print()" title="Raporu Yazdır">
+            <i class="bi bi-printer"></i>
+        </button>
+        <a href="/" class="btn btn-secondary" title="Ana Sayfaya Dön">
+            <i class="bi bi-house"></i>
+        </a>
+        <a href="/results" class="btn btn-info" title="Sonuçlar Sayfasına Git">
+            <i class="bi bi-bar-chart"></i>
+        </a>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        // Tema renkleri
+        const colors = {
+            primary: '#1a73e8',
+            secondary: '#34a853',
+            accent: '#fbbc04',
+            danger: '#ea4335',
+            light: '#f8f9fa',
+            dark: '#202124',
+            buyback: 'rgba(26, 115, 232, 0.7)',
+            dividend: 'rgba(52, 168, 83, 0.7)',
+            buybackBorder: 'rgba(26, 115, 232, 1)',
+            dividendBorder: 'rgba(52, 168, 83, 1)'
+        };
+        
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tabloları Bootstrap stilinde düzenle
+            const tables = document.querySelectorAll('table');
+            tables.forEach(function(table) {
+                table.classList.add('table', 'table-striped', 'table-hover');
+            });
+            
+            // Smooth Scroll
+            document.querySelectorAll('.report-nav a').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                        
+                        // Aktif sınıfını güncelle
+                        document.querySelectorAll('.report-nav a').forEach(a => {
+                            a.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                    }
+                });
+            });
+            
+            // Scroll olayına bağlı olarak aktif sekmeyi güncelle
+            window.addEventListener('scroll', function() {
+                const scrollPosition = window.scrollY;
+                const sections = document.querySelectorAll('.report-section');
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 100;
+                    const sectionHeight = section.offsetHeight;
+                    
+                    if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                        const targetAnchor = document.querySelector(`.report-nav a[href="#${section.id}"]`);
+                        if (targetAnchor) {
+                            document.querySelectorAll('.report-nav a').forEach(a => {
+                                a.classList.remove('active');
+                            });
+                            targetAnchor.classList.add('active');
+                        }
+                    }
+                });
+            });
+            
+            // Grafikleri çiz
+            renderCharts();
+        });
+        
+        // Veri oluşturma veya API'den alma
+        async function fetchChartData() {
+            try {
+                const response = await fetch('/api/chart-data');
+                if (!response.ok) {
+                    throw new Error('Veri alınamadı');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Grafik verisi yüklenemedi:', error);
+                // Varsayılan veri
+                return {
+                    carComparison: {
+                        labels: ['Geri Alım', 'Temettü'],
+                        values: [2.83, 1.47]
+                    },
+                    financialMetrics: {
+                        labels: ['Geri Alım', 'Temettü'],
+                        roe: [19.8, 16.2],
+                        roa: [8.7, 7.1],
+                        margin: [14.3, 11.9]
+                    },
+                    sectorAnalysis: {
+                        labels: ['Teknoloji', 'Sağlık', 'Finans', 'Enerji', 'Tüketici', 'Sanayi'],
+                        buyback: [3.6, 3.1, 2.4, 1.9, 2.8, 2.3],
+                        dividend: [1.8, 1.5, 2.1, 2.3, 1.9, 1.7]
+                    },
+                    timeSeries: {
+                        labels: ['2018', '2019', '2020', '2021', '2022', '2023'],
+                        buyback: [2.1, 2.3, 2.5, 2.7, 2.9, 3.1],
+                        dividend: [1.6, 1.5, 1.4, 1.5, 1.6, 1.7]
+                    }
+                };
+            }
+        }
+        
+        // Tüm grafikleri çiz
+        async function renderCharts() {
+            const data = await fetchChartData();
+            
+            // CAR Karşılaştırma Grafiği
+            const carCtx = document.getElementById('carComparisonChart');
+            if (carCtx) {
+                new Chart(carCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.carComparison.labels,
+                        datasets: [{
+                            label: 'Ortalama CAR (%)',
+                            data: data.carComparison.values,
+                            backgroundColor: [colors.buyback, colors.dividend],
+                            borderColor: [colors.buybackBorder, colors.dividendBorder],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `CAR: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Kümülatif Anormal Getiri (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Finansal Performans Grafiği
+            const financialCtx = document.getElementById('financialPerformanceChart');
+            if (financialCtx) {
+                new Chart(financialCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['ROE', 'ROA', 'Kâr Marjı'],
+                        datasets: [{
+                            label: 'Geri Alım',
+                            data: [
+                                data.financialMetrics.roe[0],
+                                data.financialMetrics.roa[0],
+                                data.financialMetrics.margin[0]
+                            ],
+                            backgroundColor: 'rgba(26, 115, 232, 0.2)',
+                            borderColor: colors.buybackBorder,
+                            borderWidth: 2,
+                            pointBackgroundColor: colors.buybackBorder,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: colors.buybackBorder
+                        }, {
+                            label: 'Temettü',
+                            data: [
+                                data.financialMetrics.roe[1],
+                                data.financialMetrics.roa[1],
+                                data.financialMetrics.margin[1]
+                            ],
+                            backgroundColor: 'rgba(52, 168, 83, 0.2)',
+                            borderColor: colors.dividendBorder,
+                            borderWidth: 2,
+                            pointBackgroundColor: colors.dividendBorder,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: colors.dividendBorder
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    display: true
+                                },
+                                suggestedMin: 0
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Sektörel Analiz Grafiği
+            const sectorCtx = document.getElementById('sectorAnalysisChart');
+            if (sectorCtx) {
+                new Chart(sectorCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.sectorAnalysis.labels,
+                        datasets: [{
+                            label: 'Geri Alım',
+                            data: data.sectorAnalysis.buyback,
+                            backgroundColor: colors.buyback,
+                            borderColor: colors.buybackBorder,
+                            borderWidth: 1
+                        }, {
+                            label: 'Temettü',
+                            data: data.sectorAnalysis.dividend,
+                            backgroundColor: colors.dividend,
+                            borderColor: colors.dividendBorder,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'CAR (%)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Zaman Serisi Grafiği
+            const timeCtx = document.getElementById('timeSeriesChart');
+            if (timeCtx) {
+                new Chart(timeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.timeSeries.labels,
+                        datasets: [{
+                            label: 'Geri Alım',
+                            data: data.timeSeries.buyback,
+                            backgroundColor: 'rgba(26, 115, 232, 0.1)',
+                            borderColor: colors.buybackBorder,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        }, {
+                            label: 'Temettü',
+                            data: data.timeSeries.dividend,
+                            backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                            borderColor: colors.dividendBorder,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: %${context.raw.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'CAR (%)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Yıl'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

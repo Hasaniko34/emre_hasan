@@ -1,0 +1,3 @@
+ticker,company_name,sector,country,market_cap,pe_ratio,dividend_yield,roe_latest,roe_prev,roe_change,roa_latest,roa_prev,roa_change,net_income_latest,net_income_prev,net_income_change,total_assets_latest,total_equity_latest,debt_equity_ratio
+AAPL,Apple Inc.,Technology,United States,3143825096704,33.219048,0.48,0,0,0,10.55843759536161,4.037481505835936,6.520956089525674,36330000000.0,14736000000.0,146.53908794788273,344085000000.0,0,0
+THYAO.IS,Türk Hava Yollari Anonim Ortakligi,Industrials,Turkey,442111000576,3.3422742,2.17,0,0,0,1.4691556345142849,3.8918155924684297,-2.422659957954145,20562390410.0,52822447920.0,-61.07262874083024,1399606000000.0,0,0

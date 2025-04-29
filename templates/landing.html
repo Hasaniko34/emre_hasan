@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinVision | Hisse Geri Alımı ve Temettü Etki Analizi</title>
+    <!-- Bootstrap 5.3 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800;900&display=swap">
+    <!-- AOS Animasyon -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #5e35b1;
+            --secondary-color: #03a9f4;
+            --accent-color: #00e5ff;
+            --dark-color: #121212;
+            --light-color: #f5f5f7;
+            --text-color: #333333;
+            --text-light: #767676;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --gradient-primary: linear-gradient(135deg, #5e35b1, #3949ab);
+            --gradient-secondary: linear-gradient(135deg, #03a9f4, #00e5ff);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-color);
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+        
+        .section {
+            padding: 80px 0;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: var(--gradient-primary);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 50%;
+            background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080');
+            background-size: cover;
+            background-position: center;
+            clip-path: polygon(15% 0, 100% 0%, 100% 100%, 0% 100%);
+            z-index: 1;
+        }
+        
+        .hero-shape {
+            position: absolute;
+            bottom: -100px;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background-color: var(--light-color);
+            clip-path: polygon(0 50%, 100% 0, 100% 100%, 0% 100%);
+            z-index: 3;
+        }
+        
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(94, 53, 177, 0.7);
+            z-index: 1;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-secondary);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 500;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(3, 169, 244, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(3, 169, 244, 0.5);
+        }
+        
+        .btn-outline-light {
+            border: 2px solid white;
+            padding: 12px 30px;
+            font-weight: 500;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: white;
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+        
+        /* Features Section */
+        .features {
+            background-color: white;
+        }
+        
+        .feature-card {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 28px;
+        }
+        
+        .feature-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        /* Call to Action */
+        .cta {
+            background: var(--gradient-primary);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .cta p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .cta-shape {
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .cta-shape-2 {
+            position: absolute;
+            bottom: -120px;
+            left: -120px;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        /* Navbar */
+        .navbar {
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: white;
+        }
+        
+        .navbar-nav .btn {
+            margin-left: 10px;
+        }
+        
+        .navbar-scrolled {
+            background-color: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+        }
+        
+        .navbar-scrolled .navbar-brand,
+        .navbar-scrolled .navbar-nav .nav-link {
+            color: var(--text-color);
+        }
+        
+        .navbar-scrolled .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.5)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 60px 0 30px;
+        }
+        
+        footer h4 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        footer ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        footer ul li {
+            margin-bottom: 10px;
+        }
+        
+        footer ul li a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        footer ul li a:hover {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .social-icons a {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin-right: 10px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+            margin-top: 40px;
+        }
+        
+        /* Testimonials */
+        .testimonials {
+            background-color: var(--light-color);
+        }
+        
+        .testimonial-card {
+            background-color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            font-size: 100px;
+            color: var(--primary-color);
+            opacity: 0.1;
+            font-family: 'Georgia', serif;
+            line-height: 1;
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .testimonial-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+        
+        .testimonial-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .testimonial-info h5 {
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .testimonial-info p {
+            margin: 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        /* Stats */
+        .stats {
+            background: var(--gradient-secondary);
+            color: white;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        /* Animation Utility */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .hero-bg {
+                width: 100%;
+                clip-path: none;
+                opacity: 0.2;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.3rem;
+            }
+            
+            .section {
+                padding: 60px 0;
+            }
+            
+            .cta h2 {
+                font-size: 2rem;
+            }
+            
+            .stat-number {
+                font-size: 2.5rem;
+            }
+            
+            .navbar-collapse {
+                background-color: var(--primary-color);
+                padding: 20px;
+                border-radius: var(--border-radius);
+                margin-top: 10px;
+            }
+            
+            .navbar-scrolled .navbar-collapse {
+                background-color: white;
+            }
+            
+            .navbar-scrolled .navbar-nav .nav-link {
+                color: var(--text-color);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .feature-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">Fin<span style="color: var(--accent-color)">Vision</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Özellikler</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonials">Referanslar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing">Hakkımızda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light" href="/login">Giriş Yap</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="/register">Kayıt Ol</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h1>Hisse Geri Alımı ve Temettü Etkisi Analizi</h1>
+                    <p>Yatırım stratejinize yön verecek finansal kararların etkisini analiz edin. Piyasa tepkilerini ve şirket performansını gerçek verilerle değerlendirin.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="/register" class="btn btn-primary">Hemen Başla</a>
+                        <a href="/report" class="btn btn-outline-light">Demo Raporu Gör</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg"></div>
+        <div class="hero-shape"></div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section features" id="features">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-6 mx-auto">
+                    <h2 data-aos="fade-up">Öne Çıkan Özellikler</h2>
+                    <p data-aos="fade-up" data-aos-delay="100">
+                        Kapsamlı analiz ve detaylı raporlama özellikleriyle yatırım kararlarınıza destek oluyoruz.
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-4" data-aos="fade-up">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h3>Olay Çalışması Analizi</h3>
+                        <p>Hisse geri alımı ve temettü duyurularının hisse fiyatları üzerindeki etkisini kapsamlı olarak ölçümleme.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+                        <h3>İnteraktif Grafikler</h3>
+                        <p>Veri görselleştirme araçlarıyla karmaşık analizleri anlaşılabilir ve etkileşimli grafiklerle sunma.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <h3>Profesyonel Raporlar</h3>
+                        <p>Detaylı finansal analizleri ve bulgularınızı profesyonel, yazdırılabilir raporlara dönüştürme.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-arrows-angle-expand"></i>
+                        </div>
+                        <h3>Karşılaştırmalı Analiz</h3>
+                        <p>Farklı şirketlerin ve sektörlerin nakit dağıtım stratejilerini karşılaştırmalı olarak inceleme.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <h3>Tarihsel Veriler</h3>
+                        <p>Uzun dönemli piyasa tepkilerini ve trendleri kapsamlı veri setiyle analiz etme imkanı.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-cloud-download"></i>
+                        </div>
+                        <h3>Veri Dışa Aktarma</h3>
+                        <p>Analiz sonuçlarını ve raporları CSV, PDF ve Excel formatlarında dışa aktarabilme.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section stats">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6 mb-4 mb-md-0" data-aos="fade-up">
+                    <div class="stat-item">
+                        <div class="stat-number" id="companies-count">1000+</div>
+                        <div class="stat-label">İncelenen Şirket</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-item">
+                        <div class="stat-number" id="events-count">2500+</div>
+                        <div class="stat-label">Analiz Edilen Olay</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-item">
+                        <div class="stat-number" id="users-count">300+</div>
+                        <div class="stat-label">Aktif Kullanıcı</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-item">
+                        <div class="stat-number" id="reports-count">5000+</div>
+                        <div class="stat-label">Oluşturulan Rapor</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section testimonials" id="testimonials">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-lg-6 mx-auto">
+                    <h2 data-aos="fade-up">Kullanıcı Deneyimleri</h2>
+                    <p data-aos="fade-up" data-aos-delay="100">
+                        Kullanıcılarımızın platformumuzdaki deneyimleri ve başarılı analizleri.
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4" data-aos="fade-up">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">
+                            "Hisse geri alımlarının etkisini analiz etmek için kullandığım en kapsamlı araç. Yatırım stratejimizi belirlemede değerli içgörüler sundu."
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">
+                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Ahmet Yılmaz">
+                            </div>
+                            <div class="testimonial-info">
+                                <h5>Ahmet Yılmaz</h5>
+                                <p>Portföy Yöneticisi, ABC Varlık</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">
+                            "İnteraktif grafikleri ve detaylı raporları ile finansal analizlerimizde büyük kolaylık sağladı. Temettü politikalarının etkisini net bir şekilde görebildik."
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Zeynep Kaya">
+                            </div>
+                            <div class="testimonial-info">
+                                <h5>Zeynep Kaya</h5>
+                                <p>Finansal Analist, XYZ Yatırım</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">
+                            "Araştırma çalışmalarımızda kullandığımız bu platform, akademik analizlerimize değer kattı. Özellikle sektörel karşılaştırmalar çok faydalı."
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">
+                                <img src="https://randomuser.me/api/portraits/men/62.jpg" alt="Prof. Dr. Mehmet Demir">
+                            </div>
+                            <div class="testimonial-info">
+                                <h5>Prof. Dr. Mehmet Demir</h5>
+                                <p>Finans Bölümü, İstanbul Üniversitesi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="section cta">
+        <div class="container">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8" data-aos="fade-up">
+                    <h2>Analiz Yapmaya Hemen Başlayın</h2>
+                    <p>
+                        Ücretsiz hesap oluşturarak hisse geri alımı ve temettü duyurularının etkisini analiz edin. Kapsamlı raporlar ve interaktif grafiklerle finansal stratejinize yön verin.
+                    </p>
+                    <a href="/register" class="btn btn-light">Hesap Oluştur</a>
+                </div>
+            </div>
+        </div>
+        <div class="cta-shape"></div>
+        <div class="cta-shape-2"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h4>Fin<span style="color: var(--accent-color)">Vision</span></h4>
+                    <p>
+                        Finansal analiz ve raporlama için geliştirilmiş, kapsamlı bir platform.
+                    </p>
+                    <div class="social-icons mt-3">
+                        <a href="#"><i class="bi bi-twitter"></i></a>
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-linkedin"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h4>Bağlantılar</h4>
+                    <ul>
+                        <li><a href="/">Ana Sayfa</a></li>
+                        <li><a href="/results">Sonuçlar</a></li>
+                        <li><a href="/report">Raporlar</a></li>
+                        <li><a href="/login">Giriş Yap</a></li>
+                        <li><a href="/register">Kayıt Ol</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h4>Kaynaklar</h4>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Dökümantasyon</a></li>
+                        <li><a href="#">Eğitim Videoları</a></li>
+                        <li><a href="#">Sık Sorulan Sorular</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4>İletişim</h4>
+                    <ul>
+                        <li><i class="bi bi-geo-alt me-2"></i> Finans Merkezi, Blok D, Kat 5</li>
+                        <li><i class="bi bi-envelope me-2"></i> info@finvision.com</li>
+                        <li><i class="bi bi-telephone me-2"></i> (0212) 555 0100</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row footer-bottom">
+                <div class="col-md-6">
+                    <p>&copy; 2025 FinVision. Tüm hakları saklıdır.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>
+                        <a href="#">Gizlilik Politikası</a> |
+                        <a href="#">Kullanım Şartları</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Custom JS -->
+    <script>
+        // AOS Animasyon Başlat
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+        
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scrolled');
+            } else {
+                navbar.classList.remove('navbar-scrolled');
+            }
+        });
+        
+        // Sayaç Animasyonu
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.textContent);
+                let count = 0;
+                const increment = target / 50; // Hız ayarı
+                
+                const updateCount = () => {
+                    if (count < target) {
+                        count += increment;
+                        counter.textContent = Math.ceil(count) + (counter.textContent.includes('+') ? '+' : '');
+                        setTimeout(updateCount, 30);
+                    } else {
+                        counter.textContent = target + (counter.textContent.includes('+') ? '+' : '');
+                    }
+                };
+                
+                updateCount();
+            });
+        }
+        
+        // İstatistiklerin görünür olduğunda animasyonu başlat
+        const statsSection = document.querySelector('.stats');
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        observer.observe(statsSection);
+    </script>
+</body>
+</html> 

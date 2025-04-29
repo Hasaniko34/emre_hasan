@@ -1,0 +1,62 @@
+[
+    {
+        "ticker": "AAPL",
+        "name": "Apple Inc.",
+        "sector": "Teknoloji",
+        "country": "ABD"
+    },
+    {
+        "ticker": "MSFT",
+        "name": "Microsoft Corporation",
+        "sector": "Teknoloji",
+        "country": "ABD"
+    },
+    {
+        "ticker": "JNJ",
+        "name": "Johnson & Johnson",
+        "sector": "Sağlık",
+        "country": "ABD"
+    },
+    {
+        "ticker": "KO",
+        "name": "The Coca-Cola Company",
+        "sector": "Tüketici Ürünleri",
+        "country": "ABD"
+    },
+    {
+        "ticker": "XOM",
+        "name": "Exxon Mobil Corporation",
+        "sector": "Enerji",
+        "country": "ABD"
+    },
+    {
+        "ticker": "THYAO.IS",
+        "name": "Türk Hava Yolları",
+        "sector": "Ulaşım",
+        "country": "Türkiye"
+    },
+    {
+        "ticker": "TUPRS.IS",
+        "name": "Türkiye Petrol Rafinerileri A.Ş.",
+        "sector": "Enerji",
+        "country": "Türkiye"
+    },
+    {
+        "ticker": "EREGL.IS",
+        "name": "Ereğli Demir ve Çelik Fabrikaları T.A.Ş.",
+        "sector": "Metal",
+        "country": "Türkiye"
+    },
+    {
+        "ticker": "AKBNK.IS",
+        "name": "Akbank T.A.Ş.",
+        "sector": "Finans",
+        "country": "Türkiye"
+    },
+    {
+        "ticker": "BIMAS.IS",
+        "name": "BİM Birleşik Mağazalar A.Ş.",
+        "sector": "Perakende",
+        "country": "Türkiye"
+    }
+]

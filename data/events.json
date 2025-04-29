@@ -1,0 +1,62 @@
+[
+    {
+        "ticker": "AAPL",
+        "date": "2023-01-15",
+        "type": "buyback",
+        "description": "Apple 90 milyar dolarlık ek hisse geri alım programı duyurdu"
+    },
+    {
+        "ticker": "MSFT",
+        "date": "2022-09-20",
+        "type": "buyback",
+        "description": "Microsoft 60 milyar dolarlık hisse geri alım programı duyurdu"
+    },
+    {
+        "ticker": "THYAO.IS",
+        "date": "2022-03-15",
+        "type": "buyback",
+        "description": "THY 1 milyar TL'lik hisse geri alım programı duyurdu"
+    },
+    {
+        "ticker": "EREGL.IS",
+        "date": "2021-11-10",
+        "type": "buyback",
+        "description": "Ereğli Demir Çelik 500 milyon TL'lik hisse geri alım programı duyurdu"
+    },
+    {
+        "ticker": "XOM",
+        "date": "2022-04-26",
+        "type": "buyback",
+        "description": "Exxon Mobil 30 milyar dolarlık hisse geri alım programı duyurdu"
+    },
+    {
+        "ticker": "JNJ",
+        "date": "2023-02-10",
+        "type": "dividend",
+        "description": "Johnson & Johnson 2023Q1 temettü duyurusu"
+    },
+    {
+        "ticker": "KO",
+        "date": "2022-10-18",
+        "type": "dividend",
+        "description": "Coca-Cola 2022Q4 temettü duyurusu"
+    },
+    {
+        "ticker": "TUPRS.IS",
+        "date": "2023-03-22",
+        "type": "dividend",
+        "description": "Tüpraş 2022 yılı temettü duyurusu"
+    },
+    {
+        "ticker": "AKBNK.IS",
+        "date": "2022-03-25",
+        "type": "dividend",
+        "description": "Akbank 2021 yılı temettü duyurusu"
+    },
+    {
+        "ticker": "BIMAS.IS",
+        "date": "2023-04-05",
+        "type": "dividend",
+        "description": "BİM 2022 yılı temettü duyurusu"
+    }
+]

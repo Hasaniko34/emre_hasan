@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol | FinVision</title>
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-500: #adb5bd;
+            --success: #2ecc71;
+            --info: #3498db;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            
+            --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+            --shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+            --shadow-lg: 0 1rem 3rem rgba(0,0,0,.175);
+            
+            --font-sans-serif: 'Poppins', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+            
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: var(--font-sans-serif);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            background: url('https://source.unsplash.com/random/1920x1080/?finance,technology') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.9), rgba(114, 9, 183, 0.9));
+            z-index: -1;
+        }
+        
+        .register-container {
+            max-width: 500px;
+            width: 100%;
+            background-color: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+        
+        .register-header {
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .register-header h1 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .register-header p {
+            opacity: 0.8;
+            margin-bottom: 0;
+        }
+        
+        .register-body {
+            padding: 2rem;
+        }
+        
+        .form-floating {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-floating .form-control {
+            border-radius: 0.5rem;
+            height: calc(3.5rem + 2px);
+            padding: 1.5rem 1rem 0.5rem;
+        }
+        
+        .form-floating label {
+            padding: 1rem 1rem 0;
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            transition: var(--transition);
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 10;
+            color: var(--gray-500);
+        }
+        
+        .password-confirm-toggle {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 10;
+            color: var(--gray-500);
+        }
+        
+        .password-container,
+        .password-confirm-container {
+            position: relative;
+        }
+        
+        .social-login {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        .social-login-heading {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .social-login-heading::before,
+        .social-login-heading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 35%;
+            height: 1px;
+            background-color: var(--gray-300);
+        }
+        
+        .social-login-heading::before {
+            left: 0;
+        }
+        
+        .social-login-heading::after {
+            right: 0;
+        }
+        
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 0.5rem;
+            color: white;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+        
+        .social-btn-google {
+            background-color: #DB4437;
+        }
+        
+        .social-btn-facebook {
+            background-color: #4267B2;
+        }
+        
+        .social-btn-linkedin {
+            background-color: #0077B5;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .login-link a:hover {
+            color: var(--primary-dark);
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .back-button:hover {
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        .terms-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .error-feedback {
+            display: none;
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .input-error {
+            border-color: var(--danger);
+        }
+        
+        .input-error:focus {
+            box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.25);
+        }
+        
+        .input-error + .error-feedback {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <a href="/" class="back-button">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        
+        <div class="register-header">
+            <h1>Kayıt Ol</h1>
+            <p>FinVision'a hoş geldiniz!</p>
+        </div>
+        
+        <div class="register-body">
+            <form id="registerForm" action="/register" method="post">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Ad Soyad" required>
+                    <label for="fullName">Ad Soyad</label>
+                </div>
+                
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="E-posta Adresi" required>
+                    <label for="email">E-posta Adresi</label>
+                </div>
+                
+                <div class="form-floating password-container">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Şifre" required>
+                    <label for="password">Şifre</label>
+                    <div class="password-toggle" onclick="togglePasswordVisibility()">
+                        <i class="bi bi-eye"></i>
+                    </div>
+                </div>
+                
+                <div class="form-floating password-confirm-container">
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Şifreyi Tekrar Girin" required>
+                    <label for="confirmPassword">Şifreyi Tekrar Girin</label>
+                    <div class="password-confirm-toggle" onclick="toggleConfirmPasswordVisibility()">
+                        <i class="bi bi-eye"></i>
+                    </div>
+                </div>
+                
+                <div class="terms-container">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                        <label class="form-check-label" for="termsCheck">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Kullanım şartlarını</a> ve <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">gizlilik politikasını</a> kabul ediyorum
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-register">Kayıt Ol</button>
+            </form>
+            
+            <div class="social-login">
+                <div class="social-login-heading">
+                    <span>veya</span>
+                </div>
+                
+                <div class="social-buttons">
+                    <a href="#" class="social-btn social-btn-google">
+                        <i class="bi bi-google"></i>
+                    </a>
+                    <a href="#" class="social-btn social-btn-facebook">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="#" class="social-btn social-btn-linkedin">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="login-link">
+                Zaten bir hesabınız var mı? <a href="/login">Giriş Yap</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.querySelector('.password-toggle i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordToggle.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                passwordToggle.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+        
+        function toggleConfirmPasswordVisibility() {
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const confirmPasswordToggle = document.querySelector('.password-confirm-toggle i');
+            
+            if (confirmPasswordInput.type === 'password') {
+                confirmPasswordInput.type = 'text';
+                confirmPasswordToggle.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                confirmPasswordInput.type = 'password';
+                confirmPasswordToggle.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+        
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                event.preventDefault();
+                alert('Şifreler eşleşmiyor! Lütfen kontrol ediniz.');
+            }
+        });
+    </script>
+</body>
+</html> 

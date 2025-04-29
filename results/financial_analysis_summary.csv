@@ -1,0 +1,3 @@
+ticker,roe_latest,roa_latest,profit_margin,revenue_growth,debt_equity_ratio,current_ratio,pe_ratio,dividend_yield,roe_prev,roe_change,roa_prev,roa_change,event_type
+QCOM,22.51,5.72,27.25,13.91,1.92,2.34,15.72,0.015,8.43,-1.46,9.4,3.18,Dividend
+MGROS.IS,17.63,0.71,1.21,17.44,0.75,2.1,24.12,0.0165,10.04,-0.02,9.81,-0.2,Dividend
