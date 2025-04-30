@@ -1,17 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, request, session, jsonify, flash
-import os
-import json
-import pandas as pd
-import numpy as np
-from datetime import datetime
-import matplotlib
-matplotlib.use('Agg')  # Grafik arayüzü olmayan backend kullan
+from flask import Flask, render_template, redirect, url_for, request, session, jsonify
 
 app = Flask(__name__)
 app.secret_key = 'finvision_secret_key'
-
-# Proje kök dizini
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Basit kullanıcı yönetimi
 users = {
@@ -48,18 +38,18 @@ def dashboard():
     """Dashboard / Analiz sayfası"""
     # Genişletilmiş şirket listesi
     us_companies = [
-        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA', 'JPM', 'JNJ', 'XOM', 
-        'KO', 'PG', 'WMT', 'V', 'MA', 'HD', 'BAC', 'DIS', 'NFLX', 'CSCO', 'INTC'
+        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA', 'JPM', 'JNJ', 'XOM'
     ]
     
     tr_companies = [
         'AKBNK.IS', 'THYAO.IS', 'EREGL.IS', 'GARAN.IS', 'TUPRS.IS', 'BIMAS.IS', 'KCHOL.IS', 
-        'YKBNK.IS', 'ASELS.IS', 'SISE.IS', 'PGSUS.IS', 'TCELL.IS', 'SAHOL.IS', 'TOASO.IS', 
-        'ARCLK.IS', 'TAVHL.IS', 'FROTO.IS', 'HALKB.IS', 'PETKM.IS', 'ISDMR.IS'
+        'YKBNK.IS', 'ASELS.IS', 'SISE.IS'
     ]
     
+    last_analysis_time = "2023-11-01 14:30:00"
+    
     return render_template('index.html', 
-                          last_analysis_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                          last_analysis_time=last_analysis_time,
                           has_results=True,
                           us_companies=us_companies,
                           tr_companies=tr_companies)
@@ -145,7 +135,6 @@ def chart_data():
         
         return jsonify(data)
     except Exception as e:
-        print(f"Grafik verileri alınırken hata: {str(e)}")
         # Hata durumunda boş veri döndür
         return jsonify({})
 
@@ -172,7 +161,6 @@ def get_results_json():
         }
         return jsonify(results)
     except Exception as e:
-        print(f"Sonuçlar alınırken hata: {str(e)}")
         return jsonify({})
 
 @app.route('/api/report-content')
@@ -216,7 +204,6 @@ Rapor Oluşturma Tarihi: 2023-11-01 14:30
         
         return jsonify({"content": report_content})
     except Exception as e:
-        print(f"Rapor içeriği alınırken hata: {str(e)}")
         return jsonify({"content": "Rapor yüklenirken bir hata oluştu."})
 
 if __name__ == "__main__":
