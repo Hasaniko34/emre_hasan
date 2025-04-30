@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: flask-finvision
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn app:app"
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.1
+      - key: FLASK_ENV
+        value: production 
