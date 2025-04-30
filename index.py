@@ -1,6 +1,13 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, session
+import os
+import sys
 
-app = Flask(__name__)
+# Uygulama dizinini ekleyin
+project_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_dir)
+
+from flask import Flask, render_template, redirect, url_for, request, flash, session
+from app import app
+
 app.secret_key = 'finvision_secret_key'  # Gerçek uygulamada güvenli bir değer kullanın
 
 # Basit kullanıcı yönetimi
@@ -43,5 +50,6 @@ def results():
 def report():
     return render_template('report.html')
 
+# Vercel için uygulama başlatıcı
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080) 

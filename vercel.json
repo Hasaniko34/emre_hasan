@@ -6,7 +6,7 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "50mb",
-        "includeFiles": ["templates/**", "static/**"]
+        "includeFiles": ["templates/**", "static/**", "app.py", "data/**", "results/**", "report/**", "analysis/**"]
       }
     }
   ],
@@ -19,6 +19,7 @@
   "env": {
     "FLASK_ENV": "production",
     "FLASK_APP": "app.py",
-    "MATPLOTLIB_BACKEND": "Agg"
+    "MATPLOTLIB_BACKEND": "Agg",
+    "PYTHON_VERSION": "3.9"
   }
 } 
