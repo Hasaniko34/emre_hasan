@@ -3,7 +3,7 @@ services:
     name: flask-finvision
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn app:app"
+    startCommand: "gunicorn wsgi:app"
     plan: free
     envVars:
       - key: PYTHON_VERSION
